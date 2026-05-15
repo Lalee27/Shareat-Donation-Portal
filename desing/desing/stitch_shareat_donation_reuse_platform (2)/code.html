@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Shareat - NGO Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#dbdad7",
+                        "on-background": "#1a1c1a",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#5f1300",
+                        "tertiary-fixed-dim": "#ffb5a1",
+                        "primary-fixed": "#e0e0ff",
+                        "outline-variant": "#c6c5d4",
+                        "inverse-on-surface": "#f2f1ee",
+                        "on-surface": "#1a1c1a",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#bdc2ff",
+                        "surface-variant": "#e3e2e0",
+                        "error": "#ba1a1a",
+                        "secondary": "#964900",
+                        "inverse-surface": "#2f312f",
+                        "surface-container-highest": "#e3e2e0",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#723600",
+                        "surface-container": "#efeeeb",
+                        "surface-container-high": "#e9e8e5",
+                        "surface-tint": "#4c56af",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-container": "#ff663c",
+                        "primary": "#000666",
+                        "on-tertiary-fixed-variant": "#881f00",
+                        "primary-fixed-dim": "#bdc2ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#311300",
+                        "surface-container-low": "#f4f3f1",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffdbd1",
+                        "background": "#faf9f6",
+                        "on-secondary-container": "#5e2c00",
+                        "on-primary-fixed-variant": "#343d96",
+                        "on-tertiary-fixed": "#3b0800",
+                        "tertiary": "#3a0800",
+                        "outline": "#767683",
+                        "secondary-fixed-dim": "#ffb786",
+                        "secondary-fixed": "#ffdcc6",
+                        "surface": "#faf9f6",
+                        "surface-bright": "#faf9f6",
+                        "secondary-container": "#fc820c",
+                        "on-primary-fixed": "#000767",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#454652",
+                        "on-primary-container": "#8690ee",
+                        "primary-container": "#1a237e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "xl": "80px",
+                        "base": "8px",
+                        "md": "24px",
+                        "lg": "48px",
+                        "container-max": "1280px",
+                        "sm": "12px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "h3": ["Plus Jakarta Sans"],
+                        "h1": ["Plus Jakarta Sans"],
+                        "body-md": ["Inter"],
+                        "caption": ["Inter"],
+                        "label-md": ["Inter"],
+                        "h2": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "h3": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "h1": ["40px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "caption": ["12px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "1.4", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "h2": ["32px", { "lineHeight": "1.25", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        .bg-pattern {
+            background-image: radial-gradient(theme('colors.primary') 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.03;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden antialiased font-body-md relative">
+<div class="absolute inset-0 bg-pattern pointer-events-none"></div>
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-screen left-0 w-64 border-r border-outline-variant bg-surface-container-low dark:bg-surface-dim z-20">
+<div class="p-gutter border-b border-outline-variant/30 flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-h3">S</div>
+<div>
+<h1 class="font-h3 text-h3 font-bold text-primary dark:text-primary-fixed">Shareat</h1>
+<p class="font-caption text-caption text-on-surface-variant">Social Impact Platform</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto flex flex-col p-sm space-y-xs font-label-md text-label-md text-primary dark:text-primary-fixed-dim">
+<a class="flex items-center gap-sm p-sm text-on-surface-variant hover:bg-surface-variant rounded-xl transition-all focus:ring-2 focus:ring-secondary" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- Active state based on intent: "Available Requests" maps closest to Dashboard or Inventory, but we'll highlight Dashboard as the main entry or a custom state if it was in the array. Since array is ["Dashboard", "My Donations", "Schedule Pickup", "Inventory", "Impact", "Profile"], and user asked for "Available Requests", we'll highlight Dashboard as the main view. -->
+<a class="flex items-center gap-sm p-sm bg-primary-container text-on-primary-container rounded-xl font-bold transition-all focus:ring-2 focus:ring-secondary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span>Available Requests</span>
+</a>
+<a class="flex items-center gap-sm p-sm text-on-surface-variant hover:bg-surface-variant rounded-xl transition-all focus:ring-2 focus:ring-secondary" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span>Schedule Pickup</span>
+</a>
+<a class="flex items-center gap-sm p-sm text-on-surface-variant hover:bg-surface-variant rounded-xl transition-all focus:ring-2 focus:ring-secondary" href="#">
+<span class="material-symbols-outlined">volunteer_activism</span>
+<span>My Donations</span>
+</a>
+<a class="flex items-center gap-sm p-sm text-on-surface-variant hover:bg-surface-variant rounded-xl transition-all focus:ring-2 focus:ring-secondary" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span>Impact</span>
+</a>
+<a class="flex items-center gap-sm p-sm text-on-surface-variant hover:bg-surface-variant rounded-xl transition-all focus:ring-2 focus:ring-secondary" href="#">
+<span class="material-symbols-outlined">person</span>
+<span>Profile</span>
+</a>
+</div>
+<div class="p-gutter border-t border-outline-variant/30">
+<button class="w-full py-sm px-md bg-secondary-container text-on-primary rounded-lg font-label-md font-bold hover:bg-secondary transition-all flex justify-center items-center gap-xs shadow-[0px_4px_20px_rgba(26,35,126,0.05)]">
+<span class="material-symbols-outlined">add</span>
+                New Donation
+            </button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden bg-background relative z-10">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-gutter h-16 w-full bg-surface dark:bg-surface-container-lowest shadow-sm z-20 flex-shrink-0">
+<div class="flex items-center gap-md">
+<button class="md:hidden text-on-surface-variant hover:bg-surface-container-high rounded-full p-2 transition-all duration-200">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="font-h3 text-h3 font-bold text-primary">Dashboard</h2>
+</div>
+<div class="flex items-center gap-sm">
+<button class="text-on-surface-variant hover:bg-surface-container-high rounded-full p-2 transition-all duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-container-high rounded-full p-2 transition-all duration-200">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden ml-sm border border-outline-variant">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a person, used as a user profile avatar in a digital interface. The lighting is bright and studio-quality, conveying a sense of trust and approachability suitable for a corporate modern application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWJxqEAqxPwqjLsGE24UPFEnWGV8JjbcPIdMT_hitVaEH_ZHNYDyaP7qA6UoBtbZG3-1GxtfxFxW4PmNA19205bRJ1gkbeQi0ulXWXBBYLdbpys8qodD7M4td2aP5eMy1mFG3v8kiVX3ZbJjX0H-P3F7N7X3JoRt5KWDXoFC0CQbi1SK4449BLmEO6vP-k1Tgf9OBavs0B8Lx1btFDonf3-zKn9E_n0Nuz23XXsniRgsTjRr-BcxJqC8K7ZVNsknGyYHdHWImgYMU"/>
+</div>
+</div>
+</header>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-gutter space-y-xl">
+<!-- Inventory Summary (Top Section) -->
+<section class="max-w-container-max mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<div class="bg-surface rounded-xl p-md shadow-[0px_4px_20px_rgba(26,35,126,0.05)] border-t-4 border-secondary-container">
+<div class="flex items-center gap-sm text-on-surface-variant mb-xs">
+<span class="material-symbols-outlined">inventory</span>
+<h3 class="font-label-md text-label-md">Items Received</h3>
+</div>
+<p class="font-h1 text-h1 text-primary">1,248</p>
+<p class="font-caption text-caption text-secondary mt-xs">+12% this month</p>
+</div>
+<div class="bg-surface rounded-xl p-md shadow-[0px_4px_20px_rgba(26,35,126,0.05)] border-t-4 border-primary-container">
+<div class="flex items-center gap-sm text-on-surface-variant mb-xs">
+<span class="material-symbols-outlined">group</span>
+<h3 class="font-label-md text-label-md">Beneficiaries Helped</h3>
+</div>
+<p class="font-h1 text-h1 text-primary">856</p>
+<p class="font-caption text-caption text-secondary mt-xs">+8% this month</p>
+</div>
+<div class="bg-surface rounded-xl p-md shadow-[0px_4px_20px_rgba(26,35,126,0.05)] flex items-center justify-between relative overflow-hidden">
+<div class="z-10">
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-xs">Monthly Goal</h3>
+<p class="font-h2 text-h2 text-primary">80%</p>
+<p class="font-caption text-caption text-on-surface-variant mt-xs">200 more items needed</p>
+</div>
+<div class="w-16 h-16 rounded-full border-4 border-surface-variant flex items-center justify-center relative z-10">
+<svg class="absolute inset-0 w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<path class="text-secondary-container" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="80, 100" stroke-width="4"></path>
+</svg>
+</div>
+</div>
+</div>
+</section>
+<!-- Available Requests Grid -->
+<section class="max-w-container-max mx-auto">
+<div class="flex justify-between items-end mb-lg">
+<div>
+<h2 class="font-h2 text-h2 text-on-background mb-xs">Available Donations</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Review and accept nearby items ready for pickup.</p>
+</div>
+<div class="flex gap-sm">
+<button class="px-sm py-xs rounded-full border border-outline-variant font-caption text-caption text-on-surface-variant flex items-center gap-xs hover:bg-surface-variant">
+<span class="material-symbols-outlined" style="font-size: 16px;">filter_list</span> Filter
+                        </button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+<!-- Card 1 -->
+<div class="bg-surface rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(26,35,126,0.05)] hover:shadow-[0px_8px_30px_rgba(26,35,126,0.08)] transition-all duration-300 flex flex-col">
+<div class="h-48 w-full relative">
+<img alt="Kitchen Supplies" class="w-full h-full object-cover" data-alt="A collection of clean, stacked kitchen pots and pans sitting on a clean wooden table in a bright, sunlit room. The image signifies high-quality donated goods ready for a new home, captured with warm, natural lighting suitable for a modern trust-focused interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvYwgxzDSNKOYT1D1o4twMCvIEYYb0V-pLKJvPXkLapLNam7mlUPJnb6M1-nZIw-c31gKt9Tm-kZZtTGQtlpNBnaps6cMo4qFPdKCCkmqi8RzKLR9aXq3OleH8cPE02zm0X07QNrjfWkYXIS-goQZEXTd1FPz2TMxl7M2xLszN95gD1P80Af-B0JL7Pd5nZrJuy0mqpNvV3ncTEsJ58zq0HzTicFNL7AGGX2gl4nz0Gxu53YKHQ8765B4df9NB1-EeNrjLYsYr3zY"/>
+<div class="absolute top-sm right-sm bg-surface-container px-sm py-xs rounded-full font-caption text-caption font-medium text-on-surface shadow-sm">
+                                2.4 miles away
+                            </div>
+</div>
+<div class="p-md flex-1 flex flex-col">
+<div class="flex gap-xs mb-sm">
+<span class="bg-primary-container/20 text-primary px-sm py-xs rounded-full font-caption text-caption">Kitchen</span>
+<span class="bg-surface-variant text-on-surface-variant px-sm py-xs rounded-full font-caption text-caption">Heavy</span>
+</div>
+<h3 class="font-h3 text-h3 text-on-background mb-xs">Complete Cookware Set</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex-1 line-clamp-2">A set of 5 stainless steel pots and pans in excellent condition. Includes lids.</p>
+<div class="mt-md pt-sm border-t border-outline-variant/30 flex justify-between items-center">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined" style="font-size: 18px;">schedule</span>
+<span class="font-caption text-caption">Available until Tomorrow</span>
+</div>
+<button class="bg-secondary-container hover:bg-secondary text-on-primary px-md py-sm rounded-lg font-label-md font-bold transition-all duration-200">
+                                    Accept
+                                </button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(26,35,126,0.05)] hover:shadow-[0px_8px_30px_rgba(26,35,126,0.08)] transition-all duration-300 flex flex-col border-t-4 border-secondary">
+<div class="h-48 w-full relative">
+<img alt="Winter Clothes" class="w-full h-full object-cover" data-alt="Neatly folded piles of warm winter clothing, including sweaters and jackets, arranged beautifully. The lighting is soft and inviting, emphasizing texture and care. The aesthetic aligns with a premium, socially conscious platform promoting cultural continuity through giving." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWALlQUfqTPbwXV4tp42r8rmAgxnpAAvbMkLamElVmnR4PALoBb8ISo_8ks2dUzdrl8hj28Av5iNIOT6gGJVJd7q6RLNszkjVWAdOLPvwUxBH5KJaMuUTSeI1JbpRIZ1H7qfTbkUfv_is9ATtUgtPJppMs1AEU0yWruo7jZzpmIQr3Mpn0vWgcLN5j9rJjgsFqQ6fu4DNgnaaPfIhNQkkpTat-LFa-XsJU63JOWEfIbjFbNhMfj45pygbNobtbCSVrLbdArl9P-kw"/>
+<div class="absolute top-sm right-sm bg-surface-container px-sm py-xs rounded-full font-caption text-caption font-medium text-on-surface shadow-sm">
+                                0.8 miles away
+                            </div>
+</div>
+<div class="p-md flex-1 flex flex-col">
+<div class="flex gap-xs mb-sm">
+<span class="bg-secondary-fixed text-on-secondary-container px-sm py-xs rounded-full font-caption text-caption">Clothes</span>
+<span class="bg-surface-variant text-on-surface-variant px-sm py-xs rounded-full font-caption text-caption">Urgent</span>
+</div>
+<h3 class="font-h3 text-h3 text-on-background mb-xs">Winter Coats &amp; Sweaters</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex-1 line-clamp-2">Several adult winter coats and thick sweaters. Washed and packed in boxes.</p>
+<div class="mt-md pt-sm border-t border-outline-variant/30 flex justify-between items-center">
+<div class="flex items-center gap-xs text-error">
+<span class="material-symbols-outlined" style="font-size: 18px;">warning</span>
+<span class="font-caption text-caption font-medium">Expires in 4 hours</span>
+</div>
+<button class="bg-secondary-container hover:bg-secondary text-on-primary px-md py-sm rounded-lg font-label-md font-bold transition-all duration-200 shadow-[0px_4px_20px_rgba(26,35,126,0.05)]">
+                                    Accept
+                                </button>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface rounded-xl overflow-hidden shadow-[0px_4px_20px_rgba(26,35,126,0.05)] hover:shadow-[0px_8px_30px_rgba(26,35,126,0.08)] transition-all duration-300 flex flex-col">
+<div class="h-48 w-full relative">
+<img alt="Canned Food" class="w-full h-full object-cover" data-alt="A meticulously organized pantry shelf displaying rows of high-quality, unexpired canned goods and non-perishables. The image is bright and clean, projecting a sense of abundance and trust essential for a food donation dashboard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEQuSR8a22AJFNq8Ra66RbwhdMEzFuLsMh9K4AKdNC9dfCRGGNbqQFIvT-vxBTEt2gIWpfkO6dE-IoWNiyRQN8qWaBq2cBsJlQ1yOyL6ErTaxyz-JtZD29srrmVjBhw2BUST83EsQqhrDgoh18idlL0uGK7-jHPgCSZ9L87TMl1WbjFqOfwS0-yuVI_74zii4I8Q_hfnwXOvN5mYnwKY4nUX8MGvumDO6s7fMiahJt9az5wSKzRIuMCb-qmz-AY-UaojZsOQa317Q"/>
+<div class="absolute top-sm right-sm bg-surface-container px-sm py-xs rounded-full font-caption text-caption font-medium text-on-surface shadow-sm">
+                                5.1 miles away
+                            </div>
+</div>
+<div class="p-md flex-1 flex flex-col">
+<div class="flex gap-xs mb-sm">
+<span class="bg-tertiary-fixed text-on-tertiary-fixed px-sm py-xs rounded-full font-caption text-caption">Non-Perishable</span>
+<span class="bg-surface-variant text-on-surface-variant px-sm py-xs rounded-full font-caption text-caption">Bulk</span>
+</div>
+<h3 class="font-h3 text-h3 text-on-background mb-xs">Canned Goods Collection</h3>
+<p class="font-body-md text-body-md text-on-surface-variant flex-1 line-clamp-2">Large donation of assorted canned vegetables, soups, and beans from a local drive.</p>
+<div class="mt-md pt-sm border-t border-outline-variant/30 flex justify-between items-center">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined" style="font-size: 18px;">schedule</span>
+<span class="font-caption text-caption">Available for 3 days</span>
+</div>
+<button class="border border-primary text-primary hover:bg-primary-fixed-dim px-md py-sm rounded-lg font-label-md font-bold transition-all duration-200">
+                                    View Details
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Confirmation Modal (Sample - Normally hidden, shown here for design requirement) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-gutter bg-on-background/40 backdrop-blur-sm pointer-events-none"> <!-- Set to pointer-events-none so we can scroll the background in this demo, usually it would block -->
+<div class="bg-surface rounded-xl shadow-[0px_8px_30px_rgba(26,35,126,0.08)] max-w-md w-full overflow-hidden pointer-events-auto border border-outline-variant/20">
+<div class="p-md bg-surface-container-low border-b border-outline-variant/30 flex justify-between items-center">
+<h3 class="font-h3 text-h3 text-primary font-bold">Accept Donation</h3>
+<button class="text-on-surface-variant hover:text-on-background transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="p-md space-y-md">
+<div class="flex items-start gap-sm">
+<div class="w-16 h-16 rounded-lg bg-surface-variant overflow-hidden flex-shrink-0">
+<img alt="Thumbnail" class="w-full h-full object-cover" data-alt="A small thumbnail showing folded winter clothes, replicating the main card image in a smaller format. Soft, warm lighting suitable for a modern UI modal." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIvXQfDr_aJNv8hzU5vHoeAm95hxiC74bZJ9fV6oPRL4zUHPOP7BOuG0mPFbJUobRXWnBDqkLV8_U42kFVfYK2Lv7jms_z-gMWKipPGeBHSs7GGFtasGYbIg-cGwDBvLUMGCS1JJPaW9hu-nPtnajLy0SUpjnEJz3njTHw-xGVau-FiSAHm3UcUM057YNAnipc4saGQEvnxYU14wLMGVMymVGN1xrctmu7wObQybBXchzzqcYtKMORdqt7bUGJ20dUxhoFw8Il2hw"/>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-background font-bold">Winter Coats &amp; Sweaters</h4>
+<p class="font-caption text-caption text-on-surface-variant">Donor: Sarah Jenkins</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-sm rounded-lg border border-outline-variant/50">
+<h5 class="font-caption text-caption font-bold text-on-surface-variant uppercase tracking-wider mb-sm">Pickup Logistics</h5>
+<div class="space-y-sm">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary">location_on</span>
+<div class="font-body-md text-body-md">
+<p class="text-on-background">123 Maple Street, Apt 4B</p>
+<p class="text-on-surface-variant text-caption">0.8 miles away</p>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary">event_available</span>
+<div class="font-body-md text-body-md">
+<p class="text-on-background">Today, 2:00 PM - 5:00 PM</p>
+</div>
+</div>
+</div>
+</div>
+<p class="font-caption text-caption text-on-surface-variant italic">
+                    By accepting, you commit to picking up this item within the agreed timeframe.
+                </p>
+</div>
+<div class="p-md bg-surface-container-low border-t border-outline-variant/30 flex justify-end gap-sm">
+<button class="px-md py-sm rounded-lg font-label-md text-on-surface-variant hover:bg-surface-variant transition-colors border border-transparent">
+                    Cancel
+                </button>
+<button class="bg-secondary-container hover:bg-secondary text-on-primary px-md py-sm rounded-lg font-label-md font-bold transition-all duration-200 shadow-sm flex items-center gap-xs">
+<span class="material-symbols-outlined" style="font-size: 18px;">check_circle</span>
+                    Confirm Pickup
+                </button>
+</div>
+</div>
+</div>
+</body></html>

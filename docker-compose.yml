@@ -1,0 +1,43 @@
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: shareat-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+  server:
+    build: ./server
+    container_name: shareat-server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server:/usr/src/app          # Live-sync server code
+      - /usr/src/app/node_modules      # Protect container's node_modules
+    environment:
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongo:27017/donation-platform
+      - JWT_SECRET=donation_platform_jwt_secret_key_2026
+      - NODE_ENV=development
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    command: npx -y nodemon index.js   # Auto-restart on file changes
+
+  client:
+    build: ./client
+    container_name: shareat-client
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/usr/src/app          # Live-sync client code
+      - /usr/src/app/node_modules      # Protect container's node_modules
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
+

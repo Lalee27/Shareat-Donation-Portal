@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Shareat - Donor Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-dim": "#dbdad7",
+                      "on-background": "#1a1c1a",
+                      "error-container": "#ffdad6",
+                      "tertiary-container": "#5f1300",
+                      "tertiary-fixed-dim": "#ffb5a1",
+                      "primary-fixed": "#e0e0ff",
+                      "outline-variant": "#c6c5d4",
+                      "inverse-on-surface": "#f2f1ee",
+                      "on-surface": "#1a1c1a",
+                      "on-error": "#ffffff",
+                      "inverse-primary": "#bdc2ff",
+                      "surface-variant": "#e3e2e0",
+                      "error": "#ba1a1a",
+                      "secondary": "#964900",
+                      "inverse-surface": "#2f312f",
+                      "surface-container-highest": "#e3e2e0",
+                      "on-primary": "#ffffff",
+                      "on-secondary-fixed-variant": "#723600",
+                      "surface-container": "#efeeeb",
+                      "surface-container-high": "#e9e8e5",
+                      "surface-tint": "#4c56af",
+                      "on-tertiary": "#ffffff",
+                      "on-tertiary-container": "#ff663c",
+                      "primary": "#000666",
+                      "on-tertiary-fixed-variant": "#881f00",
+                      "primary-fixed-dim": "#bdc2ff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary-fixed": "#311300",
+                      "surface-container-low": "#f4f3f1",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed": "#ffdbd1",
+                      "background": "#faf9f6",
+                      "on-secondary-container": "#5e2c00",
+                      "on-primary-fixed-variant": "#343d96",
+                      "on-tertiary-fixed": "#3b0800",
+                      "tertiary": "#3a0800",
+                      "outline": "#767683",
+                      "secondary-fixed-dim": "#ffb786",
+                      "secondary-fixed": "#ffdcc6",
+                      "surface": "#faf9f6",
+                      "surface-bright": "#faf9f6",
+                      "secondary-container": "#fc820c",
+                      "on-primary-fixed": "#000767",
+                      "on-secondary": "#ffffff",
+                      "on-surface-variant": "#454652",
+                      "on-primary-container": "#8690ee",
+                      "primary-container": "#1a237e"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "xl": "80px",
+                      "base": "8px",
+                      "md": "24px",
+                      "lg": "48px",
+                      "container-max": "1280px",
+                      "sm": "12px",
+                      "xs": "4px"
+              },
+              "fontFamily": {
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "h3": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "h1": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "caption": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "h2": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "h3": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "h1": [
+                              "40px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "caption": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "h2": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.25",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .mandala-bg {
+            background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" stroke="%23000666" stroke-width="1" stroke-opacity="0.03"/><path d="M50 10L50 90M10 50L90 50M21.7157 21.7157L78.2843 78.2843M21.7157 78.2843L78.2843 21.7157" stroke="%23000666" stroke-width="1" stroke-opacity="0.03"/></svg>');
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col md:flex-row mandala-bg">
+<!-- Mobile TopNavBar -->
+<header class="md:hidden bg-surface-container-lowest dark:bg-surface-container-high shadow-[0px_4px_20px_rgba(26,35,126,0.05)] docked full-width top-0 z-50">
+<div class="flex justify-between items-center px-gutter py-md w-full max-w-container-max mx-auto">
+<div class="font-h3 text-h3 font-bold text-primary dark:text-primary-fixed">Shareat</div>
+<div class="flex items-center space-x-md">
+<span class="material-symbols-outlined text-primary cursor-pointer hover:bg-surface-container-high rounded-full p-2 transition-all duration-200">menu</span>
+</div>
+</div>
+</header>
+<!-- Web SideNavBar -->
+<nav class="hidden md:flex bg-surface-container-low dark:bg-surface-dim docked h-screen left-0 w-64 border-r border-outline-variant flat no shadows fixed top-0 z-40">
+<div class="flex flex-col h-full p-sm space-y-xs w-full">
+<div class="px-md py-lg">
+<div class="font-h3 text-h3 font-bold text-primary dark:text-primary-fixed">Shareat</div>
+<div class="font-caption text-caption text-on-surface-variant mt-1">Social Impact Platform</div>
+</div>
+<div class="flex-grow flex flex-col space-y-xs">
+<!-- Active Tab -->
+<a class="bg-primary-container text-on-primary-container rounded-xl font-bold font-label-md text-label-md flex items-center px-md py-sm focus:ring-2 focus:ring-secondary" href="#">
+<span class="material-symbols-outlined mr-sm">dashboard</span>
+                    Dashboard
+                </a>
+<a class="text-on-surface-variant hover:bg-surface-variant rounded-xl font-label-md text-label-md flex items-center px-md py-sm hover:bg-surface-variant dark:hover:bg-inverse-surface transition-all focus:ring-2 focus:ring-secondary" href="#">
+<span class="material-symbols-outlined mr-sm">volunteer_activism</span>
+                    My Donations
+                </a>
+<a class="text-on-surface-variant hover:bg-surface-variant rounded-xl font-label-md text-label-md flex items-center px-md py-sm hover:bg-surface-variant dark:hover:bg-inverse-surface transition-all focus:ring-2 focus:ring-secondary" href="#">
+<span class="material-symbols-outlined mr-sm">local_shipping</span>
+                    Schedule Pickup
+                </a>
+<a class="text-on-surface-variant hover:bg-surface-variant rounded-xl font-label-md text-label-md flex items-center px-md py-sm hover:bg-surface-variant dark:hover:bg-inverse-surface transition-all focus:ring-2 focus:ring-secondary" href="#">
+<span class="material-symbols-outlined mr-sm">inventory_2</span>
+                    Inventory
+                </a>
+<a class="text-on-surface-variant hover:bg-surface-variant rounded-xl font-label-md text-label-md flex items-center px-md py-sm hover:bg-surface-variant dark:hover:bg-inverse-surface transition-all focus:ring-2 focus:ring-secondary" href="#">
+<span class="material-symbols-outlined mr-sm">monitoring</span>
+                    Impact
+                </a>
+<a class="text-on-surface-variant hover:bg-surface-variant rounded-xl font-label-md text-label-md flex items-center px-md py-sm hover:bg-surface-variant dark:hover:bg-inverse-surface transition-all focus:ring-2 focus:ring-secondary" href="#">
+<span class="material-symbols-outlined mr-sm">person</span>
+                    Profile
+                </a>
+</div>
+<div class="mt-auto px-md pb-md">
+<button class="w-full bg-[#F57C00] hover:bg-[#BF360C] text-on-primary font-label-md text-label-md py-sm rounded-xl transition-colors duration-200 shadow-sm flex items-center justify-center">
+<span class="material-symbols-outlined mr-sm text-sm">add</span>
+                    New Donation
+                </button>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 flex flex-col min-h-screen">
+<!-- Web TopAppBar -->
+<div class="hidden md:flex bg-surface dark:bg-surface-container-lowest docked full-width top-0 bg-surface dark:bg-surface-container-lowest shadow-sm flex justify-between items-center px-gutter h-16 w-full sticky z-30">
+<div class="font-h3 text-h3 text-primary">Dashboard</div>
+<div class="flex items-center space-x-md">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high rounded-full p-2 transition-all duration-200">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high rounded-full p-2 transition-all duration-200">settings</span>
+<img alt="User Avatar" class="w-8 h-8 rounded-full border border-outline-variant cursor-pointer" data-alt="A small circular profile picture of a professional individual against a neutral background. The lighting is soft and even, typical of corporate headshots. The colors are muted and natural." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCW00rc3lCQ27PL_Q9hQIUM5BNkD87m3NVcioH_4vRyY0zo-SKwVWh2xNJCYYFlXiMLCLHVNZnefGXDlGiX0G4_-8KaZFE7eFOkPNgYbfhYYaf7GD64Ll1Ispt94GEia8EClZhx8Ty_fIL0VMm5KXg5cp7tAId-TO_Q66jbXrzYEWoIookjFtjIkWr0AoP1rUVQlK6O41kXp7Rc1mc4noL2P_RVoxdLc8JVMxtldhKG_puYk5EGZxxplQLfZ1gqPTHn2PbD7Vg2xAU"/>
+</div>
+</div>
+<div class="p-gutter max-w-container-max mx-auto w-full space-y-lg flex-grow">
+<!-- Hero Card -->
+<section class="bg-surface rounded-xl shadow-[0px_4px_20px_rgba(26,35,126,0.05)] border-t-4 border-[#F57C00] overflow-hidden relative">
+<div 0="" 20="" 20\"="" class="absolute inset-0 opacity-10 pointer-events-none" fill='\"none\"' height='\"20\"' style="background-image: url('data:image/svg+xml;utf8,&lt;svg width=\" viewbox='\"0' xmlns='\"http://www.w3.org/2000/svg\"'><circle cx='\"10\"' cy='\"10\"' fill='\"%23F57C00\"/' r='\"1\"'>');"&gt;</circle></div>
+<div class="p-lg md:p-xl flex flex-col md:flex-row items-center justify-between relative z-10">
+<div class="max-w-xl mb-lg md:mb-0">
+<h1 class="font-h1 text-h1 text-primary mb-sm">Make a Difference Today</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-md">Your generosity fuels our cultural continuity. Schedule a new donation and connect with local NGOs making a real impact.</p>
+<button class="bg-[#F57C00] hover:bg-[#BF360C] text-on-primary font-label-md text-label-md py-sm px-lg rounded-xl transition-colors duration-200 shadow-[0px_8px_30px_rgba(26,35,126,0.08)] flex items-center w-max">
+                            Schedule a New Donation
+                            <span class="material-symbols-outlined ml-sm text-sm">arrow_forward</span>
+</button>
+</div>
+<div class="w-full md:w-1/3">
+<img alt="Donation Box" class="rounded-xl shadow-sm w-full object-cover h-48 md:h-64" data-alt="A beautifully crafted wooden donation box sitting on a clean, light-colored table. Soft, warm sunlight filters in, highlighting the grain of the wood. The setting is modern and minimal, with a few green plant leaves blurred in the background. The mood is hopeful and inviting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9eSA5H-ioNzb4Xiso5GXtNklG7YctXHf4cCtApF8zzLFtjFjWePnUnwuRE28MNo_gBQo0rxIt98SGMlsemgUT4uRaZymVLV2_3jcmFD3OIZ9ZRUhjZcEXsvHo7v1lQVX1Km0r82Azj0eY-cVZwXgG9dwSKr_R8Cdv-gYh7zJRdr1aTFpguHMWwESOCOlfhgUXwL9F9xfhVMYhTfrxOAr6Z7pDtCycKTZTOEPDR4zWDx5L4xr-LBLWsptvDwuQ4N-ySssOPgX9waU"/>
+</div>
+</div>
+</section>
+<!-- Stats & Tracking Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Tracking UI (Spans 2 cols on desktop) -->
+<div class="md:col-span-2 bg-surface rounded-xl shadow-[0px_4px_20px_rgba(26,35,126,0.05)] p-md flex flex-col">
+<h2 class="font-h3 text-h3 text-primary mb-md flex items-center">
+<span class="material-symbols-outlined mr-sm text-[#F57C00]">local_shipping</span>
+                        Active Donation Status
+                    </h2>
+<div class="bg-surface-container-low rounded-lg p-md mb-md border border-outline-variant/30">
+<div class="flex justify-between items-center mb-sm">
+<span class="font-label-md text-label-md text-on-surface">Donation #DN-8842</span>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed font-caption text-caption px-sm py-1 rounded-full">Food Supplies</span>
+</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Assigned to: Harmony Foundation NGO</div>
+</div>
+<!-- Stepper -->
+<div class="relative flex justify-between items-center mt-md px-sm">
+<!-- Line behind steps -->
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-surface-variant z-0 rounded-full"></div>
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-1/3 h-1 bg-gradient-to-r from-[#000666] to-[#F57C00] z-0 rounded-full"></div>
+<!-- Step 1: Pending (Completed) -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="font-caption text-caption text-on-surface mt-xs text-center w-20">Pending</span>
+</div>
+<!-- Step 2: Accepted (Active) -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-[#F57C00] text-on-primary flex items-center justify-center shadow-[0px_8px_30px_rgba(26,35,126,0.08)] ring-4 ring-[#F57C00]/20">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">handshake</span>
+</div>
+<span class="font-label-md text-label-md text-[#F57C00] font-bold mt-xs text-center w-24">Accepted by NGO</span>
+</div>
+<!-- Step 3: Out for Pickup (Pending) -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center border-2 border-surface">
+<span class="material-symbols-outlined text-sm">directions_car</span>
+</div>
+<span class="font-caption text-caption text-on-surface-variant mt-xs text-center w-24">Out for Pickup</span>
+</div>
+<!-- Step 4: Delivered (Pending) -->
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center border-2 border-surface">
+<span class="material-symbols-outlined text-sm">inventory</span>
+</div>
+<span class="font-caption text-caption text-on-surface-variant mt-xs text-center w-20">Delivered</span>
+</div>
+</div>
+</div>
+<!-- Stats Cards -->
+<div class="flex flex-col gap-gutter">
+<div class="bg-surface rounded-xl shadow-[0px_4px_20px_rgba(26,35,126,0.05)] p-md border-t-4 border-primary flex-1 flex flex-col justify-center">
+<div class="flex items-center justify-between mb-sm">
+<span class="font-label-md text-label-md text-on-surface-variant">Total Items Donated</span>
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm">inventory_2</span>
+</div>
+</div>
+<div class="font-h2 text-h2 text-primary">1,245</div>
+<div class="font-caption text-caption text-on-surface-variant mt-xs">+12% from last month</div>
+</div>
+<div class="bg-surface rounded-xl shadow-[0px_4px_20px_rgba(26,35,126,0.05)] p-md border-t-4 border-secondary-container flex-1 flex flex-col justify-center">
+<div class="flex items-center justify-between mb-sm">
+<span class="font-label-md text-label-md text-on-surface-variant">Impact Created</span>
+<div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-sm">volunteer_activism</span>
+</div>
+</div>
+<div class="font-h2 text-h2 text-primary">48<span class="font-h3 text-h3 text-on-surface-variant"> Families</span></div>
+<div class="font-caption text-caption text-on-surface-variant mt-xs">Supported this year</div>
+</div>
+</div>
+</div>
+<!-- History Table -->
+<section class="bg-surface rounded-xl shadow-[0px_4px_20px_rgba(26,35,126,0.05)] overflow-hidden border-t-4 border-outline-variant/30">
+<div class="p-md border-b border-outline-variant/30 flex justify-between items-center">
+<h2 class="font-h3 text-h3 text-primary">Recent Donations</h2>
+<button class="text-primary hover:text-secondary-container font-label-md text-label-md transition-colors flex items-center">
+                        View All
+                        <span class="material-symbols-outlined ml-xs text-sm">chevron_right</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low font-label-md text-label-md text-on-surface-variant">
+<th class="p-md font-medium border-b border-outline-variant/30">Date</th>
+<th class="p-md font-medium border-b border-outline-variant/30">Category</th>
+<th class="p-md font-medium border-b border-outline-variant/30">NGO Partner</th>
+<th class="p-md font-medium border-b border-outline-variant/30">Status</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md text-on-surface">
+<tr class="hover:bg-surface-container-lowest transition-colors group cursor-pointer border-b border-outline-variant/10">
+<td class="p-md">Oct 24, 2023</td>
+<td class="p-md">
+<span class="bg-tertiary-fixed text-on-tertiary-fixed font-caption text-caption px-sm py-1 rounded-full">Food Supplies</span>
+</td>
+<td class="p-md">Harmony Foundation</td>
+<td class="p-md">
+<span class="text-[#F57C00] font-label-md text-label-md flex items-center">
+<span class="w-2 h-2 rounded-full bg-[#F57C00] mr-xs"></span>
+                                        Accepted
+                                    </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors group cursor-pointer border-b border-outline-variant/10">
+<td class="p-md">Sep 12, 2023</td>
+<td class="p-md">
+<span class="bg-primary-fixed text-on-primary-fixed font-caption text-caption px-sm py-1 rounded-full">Clothing</span>
+</td>
+<td class="p-md">City Mission</td>
+<td class="p-md">
+<span class="text-on-surface-variant font-label-md text-label-md flex items-center">
+<span class="material-symbols-outlined text-sm mr-xs">check_circle</span>
+                                        Delivered
+                                    </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors group cursor-pointer">
+<td class="p-md">Aug 05, 2023</td>
+<td class="p-md">
+<span class="bg-secondary-fixed text-on-secondary-fixed font-caption text-caption px-sm py-1 rounded-full">Books</span>
+</td>
+<td class="p-md">EduCare India</td>
+<td class="p-md">
+<span class="text-on-surface-variant font-label-md text-label-md flex items-center">
+<span class="material-symbols-outlined text-sm mr-xs">check_circle</span>
+                                        Delivered
+                                    </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-md border-t border-outline-variant/30 flex justify-end">
+<div class="flex space-x-sm">
+<button class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-variant transition-colors disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded bg-primary text-on-primary flex items-center justify-center font-label-md text-label-md">1</button>
+<button class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors font-label-md text-label-md">2</button>
+<button class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center text-on-surface-variant hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-surface-container mt-auto full-width bottom border-t border-outline-variant flex flex-col items-center py-lg px-gutter w-full">
+<div class="font-h3 text-h3 font-bold text-primary mb-md">Shareat</div>
+<div class="flex space-x-md mb-md">
+<a class="text-on-surface-variant hover:text-primary font-caption text-caption hover:underline decoration-secondary transition-all" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-primary font-caption text-caption hover:underline decoration-secondary transition-all" href="#">Terms of Service</a>
+<a class="text-on-surface-variant hover:text-primary font-caption text-caption hover:underline decoration-secondary transition-all" href="#">Contact Us</a>
+</div>
+<div class="text-on-surface dark:text-on-surface-variant font-caption text-caption">© 2024 Shareat. Building cultural continuity through giving.</div>
+</footer>
+</main>
+</body></html>
