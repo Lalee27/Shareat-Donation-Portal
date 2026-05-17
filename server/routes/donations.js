@@ -39,6 +39,23 @@ router.post('/', auth, requireRole('donor'), async (req, res) => {
         'info',
         populated._id
       );
+    } else {
+      // Notify all NGOs that a new generic donation is available
+      try {
+        const ngos = await User.find({ role: 'ngo' });
+        const donationIdStr = populated._id.toString().slice(-6).toUpperCase();
+        for (const ngo of ngos) {
+          await createNotification(
+            ngo._id,
+            'New Donation Available',
+            `A new pending donation (#${donationIdStr}) has been posted. You can accept it now!`,
+            'info',
+            populated._id
+          );
+        }
+      } catch (e) {
+        console.error('Error notifying NGOs:', e);
+      }
     }
 
     res.status(201).json(populated);
@@ -211,6 +228,27 @@ router.put('/:id/status', auth, requireRole('ngo', 'admin'), async (req, res) =>
       const donorId = updated.donor?._id || donation.donor;
       if (donorId) {
         await createNotification(donorId, title, message, type, updated._id);
+      }
+
+      // Also notify the NGO
+      const ngoId = updated.assignedNgo?._id || donation.assignedNgo;
+      if (ngoId) {
+        let ngoTitle = '';
+        let ngoMessage = '';
+        if (status === 'accepted') {
+          ngoTitle = 'Donation Accepted';
+          ngoMessage = `You have successfully accepted donation request #${donationIdStr} from ${updated.donor?.name || 'a donor'}.`;
+        } else if (status === 'collected') {
+          ngoTitle = 'Donation Collected';
+          ngoMessage = `You have marked donation #${donationIdStr} as collected.`;
+        } else if (status === 'distributed') {
+          ngoTitle = 'Donation Distributed';
+          ngoMessage = `Fantastic! You have successfully marked donation #${donationIdStr} as distributed. Thank you for your support!`;
+        }
+
+        if (ngoTitle) {
+          await createNotification(ngoId, ngoTitle, ngoMessage, type, updated._id);
+        }
       }
     }
 
