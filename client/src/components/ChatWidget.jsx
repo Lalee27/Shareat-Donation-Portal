@@ -35,7 +35,7 @@ const ChatWidget = ({ isOpen, onClose }) => {
           parts: [{ text: m.content }]
         }));
 
-      const res = await axios.post('http://localhost:5000/api/support/chat', {
+      const res = await axios.post('/api/support/chat', {
         message: input,
         history: history
       });

@@ -23,13 +23,23 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/auth/register', formData);
-      navigate('/login');
+      const res = await axios.post('/api/auth/register', formData);
+      // Redirect to email verification page with email in state
+      if (res.data.requiresVerification) {
+        navigate('/verify-email', { state: { email: res.data.email } });
+      } else {
+        navigate('/login');
+      }
     } catch (err) {
       if (!err.response) {
         setError('Server is offline or database is not connected. Please ensure MongoDB is running and "node index.js" is active.');
       } else {
-        setError(err.response?.data?.message || 'Registration failed. Please try again.');
+        // Agar user pehle se hai but unverified hai, toh bhi verify page par bhejo
+        if (err.response?.data?.requiresVerification) {
+          navigate('/verify-email', { state: { email: err.response.data.email } });
+        } else {
+          setError(err.response?.data?.message || 'Registration failed. Please try again.');
+        }
       }
     }
   };

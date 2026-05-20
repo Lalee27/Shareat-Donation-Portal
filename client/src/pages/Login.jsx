@@ -22,7 +22,7 @@ const Login = () => {
     setShowGoogleMock(false);
 
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/google-demo', { 
+      const res = await axios.post('/api/auth/google-demo', { 
         email: mockEmail,
         role: 'donor' // Default role
       });
@@ -42,7 +42,7 @@ const Login = () => {
     setShowAppleMock(false);
 
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/apple-demo', { 
+      const res = await axios.post('/api/auth/apple-demo', { 
         email: appleEmail,
         role: 'donor' // Default role
       });
@@ -58,13 +58,16 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+      const res = await axios.post('/api/auth/login', { email, password });
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('role', res.data.user.role);
       navigate(`/${res.data.user.role}-dashboard`);
     } catch (err) {
       if (!err.response) {
         setError('Server is offline or database is not connected. Please ensure MongoDB is running and "node index.js" is active.');
+      } else if (err.response?.data?.requiresVerification) {
+        // Redirect to verify email page
+        navigate('/verify-email', { state: { email: err.response.data.email } });
       } else {
         setError(err.response?.data?.message || 'Login failed. Please try again.');
       }

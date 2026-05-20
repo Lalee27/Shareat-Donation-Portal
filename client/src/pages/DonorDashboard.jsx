@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import Footer from '../components/Footer';
@@ -34,6 +34,28 @@ const RecenterMap = ({ position }) => {
       map.setView(position, 15, { animate: true });
     }
   }, [position, map]);
+  return null;
+};
+
+// Helper component to handle map clicks for full screen
+const MapClickHandler = ({ onClick }) => {
+  useMapEvents({
+    click: () => {
+      onClick();
+    },
+  });
+  return null;
+};
+
+const MapResizeHandler = ({ isFullscreen }) => {
+  const map = useMap();
+  useEffect(() => {
+    // Timeout needed to let CSS transition finish before invalidating size
+    const timeout = setTimeout(() => {
+      map.invalidateSize();
+    }, 550);
+    return () => clearTimeout(timeout);
+  }, [isFullscreen, map]);
   return null;
 };
 
@@ -82,30 +104,17 @@ const TrackingMap = ({ donation, coords }) => {
   const ngoPos = Array.isArray(coords?.ngo) ? coords.ngo : defaultNgoPos;
   
   return (
-    <div className={`transition-all duration-500 ease-in-out relative z-[100] ${isFullscreen ? 'fixed inset-0 w-screen h-screen z-[9999] bg-white p-4' : 'h-[300px] w-full rounded-xl overflow-hidden shadow-inner border border-outline-variant/30'}`}>
-      
-      <div className="absolute top-4 right-4 z-[1000] flex gap-2">
-        <button 
-          onClick={() => setIsFullscreen(!isFullscreen)}
-          className="bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-md hover:bg-white transition-colors text-primary flex items-center justify-center"
-          title={isFullscreen ? "Exit Fullscreen" : "Expand Map"}
-        >
-          <span className="material-symbols-outlined">{isFullscreen ? 'close_fullscreen' : 'open_in_full'}</span>
-        </button>
-        <button 
-          onClick={requestLocation}
-          className="bg-[#F57C00] p-2 rounded-lg shadow-md hover:bg-[#E65100] transition-colors text-white flex items-center justify-center"
-          title="My Location"
-        >
-          <span className="material-symbols-outlined">my_location</span>
-        </button>
-      </div>
-
-      <MapContainer center={donorPos} zoom={13} scrollWheelZoom={true} style={{ height: "100%", width: "100%" }}>
+    <div 
+      className={`transition-all duration-500 ease-in-out bg-white ${isFullscreen ? 'fixed inset-0 p-4' : 'relative h-[300px] w-full rounded-xl overflow-hidden shadow-inner border border-outline-variant/30'}`}
+      style={{ zIndex: isFullscreen ? 99999 : 100 }}
+    >
+      <MapContainer center={donorPos} zoom={13} scrollWheelZoom={true} style={{ height: "100%", width: "100%", zIndex: 1 }}>
+        <MapResizeHandler isFullscreen={isFullscreen} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        {!isFullscreen && <MapClickHandler onClick={() => setIsFullscreen(true)} />}
         <RecenterMap position={currentPos} />
         <Marker position={donorPos}>
           <Popup>
@@ -126,8 +135,35 @@ const TrackingMap = ({ donation, coords }) => {
         )}
       </MapContainer>
 
+      <div className="absolute top-4 right-4 flex gap-2" style={{ zIndex: 100000 }}>
+        {isFullscreen ? (
+          <button 
+            onClick={() => setIsFullscreen(false)}
+            className="bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-md hover:bg-white transition-colors text-primary flex items-center justify-center cursor-pointer"
+            title="Exit Fullscreen"
+          >
+            <span className="material-symbols-outlined">close_fullscreen</span>
+          </button>
+        ) : (
+          <button 
+            onClick={() => setIsFullscreen(true)}
+            className="bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-md hover:bg-white transition-colors text-primary flex items-center justify-center cursor-pointer"
+            title="Expand Map"
+          >
+            <span className="material-symbols-outlined">open_in_full</span>
+          </button>
+        )}
+        <button 
+          onClick={requestLocation}
+          className="bg-[#F57C00] p-2 rounded-lg shadow-md hover:bg-[#E65100] transition-colors text-white flex items-center justify-center cursor-pointer"
+          title="My Location"
+        >
+          <span className="material-symbols-outlined">my_location</span>
+        </button>
+      </div>
+
       {!isFullscreen && (
-        <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-[10px] text-primary font-bold z-[1000] shadow-sm pointer-events-none flex items-center gap-1">
+        <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-[10px] text-primary font-bold shadow-sm pointer-events-none flex items-center gap-1" style={{ zIndex: 100000 }}>
           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
           LIVE TRACKING: {currentPos ? 'ACTIVE' : 'WAITING FOR GPS'}
         </div>
@@ -208,10 +244,10 @@ const DonorDashboard = () => {
 
         const config = { headers: { Authorization: `Bearer ${token}` } };
         const [statsRes, donationsRes, userRes, unreadCountRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/donations/stats', config),
-          axios.get('http://localhost:5000/api/donations', config),
-          axios.get('http://localhost:5000/api/auth/me', config),
-          axios.get('http://localhost:5000/api/notifications/unread-count', config)
+          axios.get('/api/donations/stats', config),
+          axios.get('/api/donations', config),
+          axios.get('/api/auth/me', config),
+          axios.get('/api/notifications/unread-count', config)
         ]);
 
         setStats(statsRes.data);
@@ -257,7 +293,7 @@ const DonorDashboard = () => {
         pickupTimeSlot: formData.pickupTimeSlot
       };
 
-      const res = await axios.post('http://localhost:5000/api/donations', payload, config);
+      const res = await axios.post('/api/donations', payload, config);
       
       setDonations([res.data, ...donations]);
       setActiveTab('dashboard');
@@ -292,7 +328,7 @@ const DonorDashboard = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.put('http://localhost:5000/api/auth/profile', profileData, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.put('/api/auth/profile', profileData, { headers: { Authorization: `Bearer ${token}` } });
       setUser(res.data);
       alert('Profile updated successfully!');
     } catch {
@@ -304,7 +340,7 @@ const DonorDashboard = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.put('http://localhost:5000/api/auth/password', passwordData, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put('/api/auth/password', passwordData, { headers: { Authorization: `Bearer ${token}` } });
       setPasswordData({ currentPassword: '', newPassword: '' });
       alert('Password updated successfully!');
     } catch (error) {
@@ -319,7 +355,7 @@ const DonorDashboard = () => {
     formData.append('avatar', file);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('http://localhost:5000/api/auth/profile/avatar', formData, { 
+      const res = await axios.post('/api/auth/profile/avatar', formData, { 
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } 
       });
       setUser(res.data);
@@ -332,7 +368,7 @@ const DonorDashboard = () => {
     if (!window.confirm('Are you sure you want to delete your profile picture?')) return;
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.delete('http://localhost:5000/api/auth/profile/avatar', { 
+      const res = await axios.delete('/api/auth/profile/avatar', { 
         headers: { Authorization: `Bearer ${token}` } 
       });
       setUser(res.data);
@@ -905,7 +941,7 @@ const DonorDashboard = () => {
                 <div className="w-full md:w-1/3 flex flex-col items-center">
                   <div className="w-40 h-40 rounded-full border-4 border-primary-fixed overflow-hidden mb-4 bg-surface-container-high flex items-center justify-center relative group cursor-pointer" onClick={() => setShowAvatarMenu(!showAvatarMenu)}>
                     {user?.avatar ? (
-                      <img src={user.avatar.startsWith('http') ? user.avatar : `http://localhost:5000${user.avatar}`} alt="Avatar" className="w-full h-full object-cover" />
+                      <img src={user.avatar.startsWith('http') ? user.avatar : `${user.avatar}`} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
                       <span className="material-symbols-outlined text-[80px] text-primary/30 block">person</span>
                     )}

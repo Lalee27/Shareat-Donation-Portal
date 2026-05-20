@@ -8,6 +8,12 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { OAuth2Client } = require('google-auth-library');
+const sendEmail = require('../utils/sendEmail');
+
+// Generate a random 6-digit OTP
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || 'your_google_client_id_here');
 
@@ -55,6 +61,25 @@ router.post('/register', async (req, res) => {
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      // Agar user hai but email verified nahi hai, toh usse dubara OTP bhejo
+      if (!existingUser.isEmailVerified) {
+        const otp = generateOTP();
+        existingUser.emailVerificationCode = otp;
+        existingUser.emailVerificationExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 min expiry
+        await existingUser.save();
+
+        await sendEmail({
+          email: existingUser.email,
+          subject: 'Shareat - Email Verification Code',
+          message: `Hello ${existingUser.name},\n\nYour email verification code is: ${otp}\n\nThis code will expire in 10 minutes.\n\n- Shareat Team`
+        });
+
+        return res.status(200).json({ 
+          message: 'Verification code resent to your email.',
+          requiresVerification: true,
+          email: existingUser.email
+        });
+      }
       return res.status(400).json({ message: 'User with this email already exists.' });
     }
 
@@ -62,7 +87,10 @@ router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create user
+    // Generate OTP for email verification
+    const otp = generateOTP();
+
+    // Create user (email unverified by default)
     const user = new User({
       name,
       email,
@@ -73,26 +101,127 @@ router.post('/register', async (req, res) => {
       registrationNumber,
       description,
       address,
-      isVerified: role === 'donor' ? true : false // Donors auto-verified, NGOs need admin approval
+      isVerified: role === 'donor' ? true : false,
+      isEmailVerified: false,
+      emailVerificationCode: otp,
+      emailVerificationExpires: new Date(Date.now() + 10 * 60 * 1000) // OTP valid for 10 minutes
     });
 
     await user.save();
 
-    // Generate JWT
-    const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    // Send OTP email to the user
+    await sendEmail({
+      email: user.email,
+      subject: 'Shareat - Verify Your Email',
+      message: `Hello ${user.name},\n\nWelcome to Shareat! Your email verification code is:\n\n${otp}\n\nThis code will expire in 10 minutes. Please enter it on the verification page to activate your account.\n\nThank you,\nShareat Team`
+    });
 
-    const userResponse = user.toObject();
-    delete userResponse.password;
+    console.log(`📧 OTP sent to ${user.email}: ${otp}`);
 
-    res.status(201).json({ token, user: userResponse });
+    res.status(201).json({ 
+      message: 'Registration successful! Please check your email for the verification code.',
+      requiresVerification: true,
+      email: user.email
+    });
   } catch (error) {
     console.error('Registration error:', error);
-    // Return Mongoose validation errors as readable messages
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map(e => e.message).join(', ');
       return res.status(400).json({ message: messages });
     }
     res.status(500).json({ message: 'Server error during registration.' });
+  }
+});
+
+// POST /api/auth/verify-email - Verify OTP code
+router.post('/verify-email', async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({ message: 'Email and verification code are required.' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found with this email.' });
+    }
+
+    if (user.isEmailVerified) {
+      return res.status(400).json({ message: 'Email is already verified. Please login.' });
+    }
+
+    // Check if OTP matches
+    if (user.emailVerificationCode !== code) {
+      return res.status(400).json({ message: 'Invalid verification code. Please try again.' });
+    }
+
+    // Check if OTP is expired
+    if (user.emailVerificationExpires && user.emailVerificationExpires < new Date()) {
+      return res.status(400).json({ message: 'Verification code has expired. Please request a new one.' });
+    }
+
+    // Mark email as verified and clear OTP fields
+    user.isEmailVerified = true;
+    user.emailVerificationCode = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+
+    // Generate JWT and auto-login
+    const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    console.log(`✅ Email verified successfully for: ${user.email}`);
+
+    res.json({ 
+      message: 'Email verified successfully!', 
+      token, 
+      user: userResponse 
+    });
+  } catch (error) {
+    console.error('Email verification error:', error);
+    res.status(500).json({ message: 'Server error during email verification.' });
+  }
+});
+
+// POST /api/auth/resend-otp - Resend verification code
+router.post('/resend-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required.' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found with this email.' });
+    }
+
+    if (user.isEmailVerified) {
+      return res.status(400).json({ message: 'Email is already verified.' });
+    }
+
+    // Generate new OTP
+    const otp = generateOTP();
+    user.emailVerificationCode = otp;
+    user.emailVerificationExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+
+    // Send new OTP
+    await sendEmail({
+      email: user.email,
+      subject: 'Shareat - New Verification Code',
+      message: `Hello ${user.name},\n\nYour new email verification code is:\n\n${otp}\n\nThis code will expire in 10 minutes.\n\n- Shareat Team`
+    });
+
+    console.log(`📧 New OTP resent to ${user.email}: ${otp}`);
+
+    res.json({ message: 'New verification code sent to your email.' });
+  } catch (error) {
+    console.error('Resend OTP error:', error);
+    res.status(500).json({ message: 'Server error resending verification code.' });
   }
 });
 
@@ -111,6 +240,27 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid email or password.' });
+    }
+
+    // Check if email is verified
+    if (!user.isEmailVerified) {
+      // Automatically resend a fresh OTP
+      const otp = generateOTP();
+      user.emailVerificationCode = otp;
+      user.emailVerificationExpires = new Date(Date.now() + 10 * 60 * 1000);
+      await user.save();
+
+      await sendEmail({
+        email: user.email,
+        subject: 'Shareat - Verify Your Email',
+        message: `Hello ${user.name},\n\nYour email verification code is:\n\n${otp}\n\nThis code will expire in 10 minutes.\n\n- Shareat Team`
+      });
+
+      return res.status(403).json({ 
+        message: 'Please verify your email first. A new verification code has been sent to your email.',
+        requiresVerification: true,
+        email: user.email
+      });
     }
 
     // Generate JWT

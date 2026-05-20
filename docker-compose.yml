@@ -27,10 +27,14 @@ services:
     command: npx -y nodemon index.js   # Auto-restart on file changes
 
   client:
-    build: ./client
+    build:
+      context: ./client
+      target: development
     container_name: shareat-client
     ports:
       - "5173:5173"
+    environment:
+      - VITE_API_TARGET=http://server:5000
     volumes:
       - ./client:/usr/src/app          # Live-sync client code
       - /usr/src/app/node_modules      # Protect container's node_modules

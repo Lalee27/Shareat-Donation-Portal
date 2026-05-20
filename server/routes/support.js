@@ -36,27 +36,55 @@ router.post('/chat', async (req, res) => {
       return res.status(500).json({ error: 'Please set a valid GEMINI_API_KEY in your server/.env file.' });
     }
 
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash",
-      systemInstruction: SYSTEM_INSTRUCTION
-    });
+    const FALLBACK_MODELS = [
+      "gemini-flash-latest",
+      "gemini-pro-latest",
+      "gemini-2.5-flash-lite",
+      "gemini-2.0-flash-lite",
+      "gemini-2.0-flash"
+    ];
 
-    const chat = model.startChat({
-      history: history || [],
-    });
+    let text = null;
+    let lastError = null;
 
-    const result = await chat.sendMessage(message);
-    const response = await result.response;
-    const text = response.text();
-
-    console.log('✅ AI Response:', text.substring(0, 50) + '...');
-    res.json({ reply: text });
-  } catch (error) {
-    console.error('❌ Gemini API Error:', error.message);
-    if (error.message.includes('API_KEY_INVALID')) {
-      return res.status(401).json({ error: 'Invalid API Key. Please check your GEMINI_API_KEY.' });
+    for (const modelName of FALLBACK_MODELS) {
+      try {
+        console.log(`Trying model: ${modelName}...`);
+        const model = genAI.getGenerativeModel({ 
+          model: modelName,
+          systemInstruction: SYSTEM_INSTRUCTION
+        });
+        
+        const chat = model.startChat({
+          history: history || [],
+        });
+        
+        const result = await chat.sendMessage(message);
+        text = await result.response.text();
+        console.log(`✅ Success with model: ${modelName}`);
+        break; // Stop trying if successful
+      } catch (err) {
+        console.error(`⚠️ Model ${modelName} failed:`, err.message.split('\n')[0]);
+        lastError = err;
+        // Do not fallback if the API key is strictly invalid
+        if (err.message.includes('API_KEY_INVALID')) {
+          return res.status(401).json({ error: 'Invalid API Key. Please check your GEMINI_API_KEY.' });
+        }
+        // otherwise, let loop continue to next model
+      }
     }
-    res.status(500).json({ error: 'Failed to get response from AI agent: ' + error.message });
+
+    if (text) {
+      console.log('✅ AI Response:', text.substring(0, 50) + '...');
+      return res.json({ reply: text });
+    } else {
+      console.error('❌ All Gemini models failed. Last error:', lastError?.message);
+      // Graceful fallback for presentations and high traffic
+      return res.json({ reply: "I'm sorry, my AI servers are currently experiencing unusually high traffic. Please try asking again in a few minutes! In the meantime, you can reach out to support@shareat.org for urgent queries." });
+    }
+  } catch (error) {
+    console.error('❌ Unexpected Error:', error.message);
+    res.status(500).json({ error: 'Failed to process request: ' + error.message });
   }
 });
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const API = 'http://localhost:5000/api';
+const API = '/api';
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState('overview');

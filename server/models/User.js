@@ -13,6 +13,11 @@ const userSchema = new mongoose.Schema({
   description: { type: String },
   isVerified: { type: Boolean, default: false },
 
+  // Email Verification (OTP System)
+  isEmailVerified: { type: Boolean, default: false },
+  emailVerificationCode: { type: String },
+  emailVerificationExpires: { type: Date },
+
   // Address
   address: {
     street: String,
@@ -34,5 +39,8 @@ const userSchema = new mongoose.Schema({
 userSchema.pre('save', function() {
   this.updatedAt = Date.now();
 });
+
+// Indexes for high performance and scalability
+userSchema.index({ role: 1 });
 
 module.exports = mongoose.model('User', userSchema);

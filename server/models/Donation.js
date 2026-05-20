@@ -49,4 +49,11 @@ donationSchema.pre('save', function() {
   this.updatedAt = Date.now();
 });
 
+// Indexes for high performance and scalability
+donationSchema.index({ donor: 1 });
+donationSchema.index({ assignedNgo: 1 });
+donationSchema.index({ status: 1 });
+donationSchema.index({ 'pickupAddress.city': 1 });
+donationSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Donation', donationSchema);

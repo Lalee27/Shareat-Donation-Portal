@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const API = 'http://localhost:5000/api';
+const API = '/api';
 
 const statusColors = {
   pending:     'text-on-surface-variant',
@@ -201,7 +201,7 @@ export default function NGODashboard() {
               )}
             </div>
             <span onClick={() => navigate('/settings')} className="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high rounded-full p-2 transition-all duration-200">settings</span>
-            <img onClick={() => setTab('profile')} alt="User Avatar" className="w-8 h-8 rounded-full border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary transition-all" src={user?.avatar ? (user.avatar.startsWith('http') ? user.avatar : `http://localhost:5000${user.avatar}`) : "https://lh3.googleusercontent.com/aida-public/AB6AXuCW00rc3lCQ27PL_Q9hQIUM5BNkD87m3NVcioH_4vRyY0zo-SKwVWh2xNJCYYFlXiMLCLHVNZnefGXDlGiX0G4_-8KaZFE7eFOkPNgYbfhYYaf7GD64Ll1Ispt94GEia8EClZhx8Ty_fIL0VMm5KXg5cp7tAId-TO_Q66jbXrzYEWoIookjFtjIkWr0AoP1rUVQlK6O41kXp7Rc1mc4noL2P_RVoxdLc8JVMxtldhKG_puYk5EGZxxplQLfZ1gqPTHn2PbD7Vg2xAU"} />
+            <img onClick={() => setTab('profile')} alt="User Avatar" className="w-8 h-8 rounded-full border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary transition-all" src={user?.avatar ? (user.avatar.startsWith('http') ? user.avatar : `${user.avatar}`) : "https://lh3.googleusercontent.com/aida-public/AB6AXuCW00rc3lCQ27PL_Q9hQIUM5BNkD87m3NVcioH_4vRyY0zo-SKwVWh2xNJCYYFlXiMLCLHVNZnefGXDlGiX0G4_-8KaZFE7eFOkPNgYbfhYYaf7GD64Ll1Ispt94GEia8EClZhx8Ty_fIL0VMm5KXg5cp7tAId-TO_Q66jbXrzYEWoIookjFtjIkWr0AoP1rUVQlK6O41kXp7Rc1mc4noL2P_RVoxdLc8JVMxtldhKG_puYk5EGZxxplQLfZ1gqPTHn2PbD7Vg2xAU"} />
           </div>
         </div>
 
@@ -218,7 +218,7 @@ export default function NGODashboard() {
               )}
             </div>
             <span onClick={() => navigate('/settings')} className="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high rounded-full p-2 transition-all duration-200">settings</span>
-            <img onClick={() => setTab('profile')} alt="User Avatar" className="w-8 h-8 rounded-full border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary transition-all" src={user?.avatar ? (user.avatar.startsWith('http') ? user.avatar : `http://localhost:5000${user.avatar}`) : "https://lh3.googleusercontent.com/aida-public/AB6AXuCW00rc3lCQ27PL_Q9hQIUM5BNkD87m3NVcioH_4vRyY0zo-SKwVWh2xNJCYYFlXiMLCLHVNZnefGXDlGiX0G4_-8KaZFE7eFOkPNgYbfhYYaf7GD64Ll1Ispt94GEia8EClZhx8Ty_fIL0VMm5KXg5cp7tAId-TO_Q66jbXrzYEWoIookjFtjIkWr0AoP1rUVQlK6O41kXp7Rc1mc4noL2P_RVoxdLc8JVMxtldhKG_puYk5EGZxxplQLfZ1gqPTHn2PbD7Vg2xAU"} />
+            <img onClick={() => setTab('profile')} alt="User Avatar" className="w-8 h-8 rounded-full border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary transition-all" src={user?.avatar ? (user.avatar.startsWith('http') ? user.avatar : `${user.avatar}`) : "https://lh3.googleusercontent.com/aida-public/AB6AXuCW00rc3lCQ27PL_Q9hQIUM5BNkD87m3NVcioH_4vRyY0zo-SKwVWh2xNJCYYFlXiMLCLHVNZnefGXDlGiX0G4_-8KaZFE7eFOkPNgYbfhYYaf7GD64Ll1Ispt94GEia8EClZhx8Ty_fIL0VMm5KXg5cp7tAId-TO_Q66jbXrzYEWoIookjFtjIkWr0AoP1rUVQlK6O41kXp7Rc1mc4noL2P_RVoxdLc8JVMxtldhKG_puYk5EGZxxplQLfZ1gqPTHn2PbD7Vg2xAU"} />
           </div>
         </div>
 
@@ -482,7 +482,7 @@ export default function NGODashboard() {
                 <div className="w-full md:w-1/3 flex flex-col items-center -mt-20 z-10">
                   <div className="w-40 h-40 rounded-full border-4 border-surface overflow-hidden mb-4 bg-surface-container-high flex items-center justify-center relative shadow-lg group cursor-pointer" onClick={() => setShowAvatarMenu(!showAvatarMenu)}>
                     {user?.avatar ? (
-                      <img src={user.avatar.startsWith('http') ? user.avatar : `http://localhost:5000${user.avatar}`} alt="Avatar" className="w-full h-full object-cover" />
+                      <img src={user.avatar.startsWith('http') ? user.avatar : `${user.avatar}`} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full bg-primary text-on-primary flex items-center justify-center text-[60px] font-bold">
                         {user?.organizationName?.[0] || user?.name?.[0] || 'N'}

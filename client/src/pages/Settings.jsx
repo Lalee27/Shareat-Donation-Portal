@@ -41,7 +41,7 @@ const Settings = () => {
           navigate('/login');
           return;
         }
-        const res = await axios.get('http://localhost:5000/api/auth/me', {
+        const res = await axios.get('/api/auth/me', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUser(res.data);
@@ -64,7 +64,7 @@ const Settings = () => {
     setIsSaving(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.put('http://localhost:5000/api/auth/profile', profileData, {
+      const res = await axios.put('/api/auth/profile', profileData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(res.data);
@@ -87,7 +87,7 @@ const Settings = () => {
     
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('http://localhost:5000/api/auth/profile/avatar', formData, { 
+      const res = await axios.post('/api/auth/profile/avatar', formData, { 
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data' 
@@ -107,7 +107,7 @@ const Settings = () => {
     if (window.confirm('Are you sure you want to permanently delete your account? This action cannot be undone.')) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete('http://localhost:5000/api/auth/account', {
+        await axios.delete('/api/auth/account', {
           headers: { Authorization: `Bearer ${token}` }
         });
         localStorage.removeItem('token');
@@ -135,7 +135,7 @@ const Settings = () => {
     setIsUpdatingPassword(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.put('http://localhost:5000/api/auth/password', passwordData, { 
+      await axios.put('/api/auth/password', passwordData, { 
         headers: { Authorization: `Bearer ${token}` } 
       });
       setPasswordData({ currentPassword: '', newPassword: '' });
@@ -159,7 +159,7 @@ const Settings = () => {
                 <div className="w-20 h-20 rounded-full bg-primary-container flex items-center justify-center text-primary text-2xl font-bold border-4 border-white shadow-sm overflow-hidden">
                   {user?.avatar ? (
                     <img 
-                      src={user.avatar.startsWith('http') ? user.avatar : `http://localhost:5000${user.avatar}`} 
+                      src={user.avatar.startsWith('http') ? user.avatar : `${user.avatar}`} 
                       alt="Avatar" 
                       className="w-full h-full object-cover" 
                     />

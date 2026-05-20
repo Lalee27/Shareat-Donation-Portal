@@ -33,4 +33,8 @@ const notificationSchema = new mongoose.Schema({
   }
 });
 
+// Indexes for high performance and scalability
+notificationSchema.index({ recipient: 1, unread: 1 });
+notificationSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Notification', notificationSchema);

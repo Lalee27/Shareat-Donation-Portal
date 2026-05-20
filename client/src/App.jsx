@@ -21,6 +21,7 @@ import NGOLogin from './pages/NGOLogin';
 import OpenApplication from './pages/OpenApplication';
 import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
+import VerifyEmail from './pages/VerifyEmail';
 
 function AppContent() {
   const location = useLocation();
@@ -44,6 +45,7 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/ngo-login" element={<NGOLogin />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/donor-dashboard" element={<DonorDashboard />} />
           <Route path="/ngo-dashboard" element={<NGODashboard />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
