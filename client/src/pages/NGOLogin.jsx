@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { setToken, setRole, removeToken } from '../utils/auth';
 
 const NGOLogin = () => {
   const [email, setEmail] = useState('');
@@ -13,13 +14,12 @@ const NGOLogin = () => {
     e.preventDefault();
     try {
       const res = await axios.post('/api/auth/login', { email, password });
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('role', res.data.user.role);
+      setToken(res.data.token);
+      setRole(res.data.user.role);
       
       if (res.data.user.role !== 'ngo') {
         setError('This login is for NGO partners only. Please use the Donor Login page.');
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
+        removeToken();
         return;
       }
       

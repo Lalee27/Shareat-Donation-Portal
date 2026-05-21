@@ -1,6 +1,3 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-
 const ImpactStories = () => {
   return (
     <div className="pt-32 pb-24 min-h-screen bg-surface relative overflow-hidden">

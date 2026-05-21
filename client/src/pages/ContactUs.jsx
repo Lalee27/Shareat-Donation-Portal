@@ -1,5 +1,3 @@
-import React from 'react';
-
 const ContactUs = () => {
   return (
     <div className="pt-32 pb-24 min-h-screen bg-surface relative overflow-hidden">
@@ -27,7 +25,7 @@ const ContactUs = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-on-surface-variant mb-1">Message</label>
-                <textarea rows="4" className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-primary focus:outline-none" placeholder="How can we help?"></textarea>
+                <textarea rows={4} className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-primary focus:outline-none" placeholder="How can we help?" />
               </div>
               <button type="button" className="w-full bg-primary text-white font-bold py-3 px-4 rounded-xl hover:bg-[#1a237e] transition-colors shadow-md">
                 Send Message

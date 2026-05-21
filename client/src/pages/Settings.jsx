@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ChatWidget from '../components/ChatWidget';
+import { getToken, removeToken } from '../utils/auth';
 
 
 const Settings = () => {
@@ -36,7 +37,7 @@ const Settings = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         if (!token) {
           navigate('/login');
           return;
@@ -63,7 +64,7 @@ const Settings = () => {
   const handleSaveProfile = async () => {
     setIsSaving(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       const res = await axios.put('/api/auth/profile', profileData, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -86,7 +87,7 @@ const Settings = () => {
     formData.append('avatar', file);
     
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       const res = await axios.post('/api/auth/profile/avatar', formData, { 
         headers: { 
           Authorization: `Bearer ${token}`,
@@ -106,11 +107,11 @@ const Settings = () => {
   const handleDeleteAccount = async () => {
     if (window.confirm('Are you sure you want to permanently delete your account? This action cannot be undone.')) {
       try {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         await axios.delete('/api/auth/account', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        localStorage.removeItem('token');
+        removeToken();
         alert('Your account has been deleted.');
         navigate('/register');
       } catch (error) {
@@ -134,7 +135,7 @@ const Settings = () => {
     e.preventDefault();
     setIsUpdatingPassword(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       await axios.put('/api/auth/password', passwordData, { 
         headers: { Authorization: `Bearer ${token}` } 
       });
@@ -399,7 +400,7 @@ const Settings = () => {
 
         <div className="mt-10 pt-6 border-t border-outline-variant/20">
           <button 
-            onClick={() => { localStorage.removeItem('token'); navigate('/login'); }}
+            onClick={() => { removeToken(); navigate('/login'); }}
             className="w-full flex items-center gap-3 px-5 py-3 rounded-xl text-[13px] font-bold text-red-500 hover:bg-red-50 transition-all"
           >
             <span className="material-symbols-outlined text-lg">logout</span>

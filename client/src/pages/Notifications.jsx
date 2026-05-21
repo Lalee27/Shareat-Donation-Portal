@@ -1,35 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getToken, getAuthHeaders } from '../utils/auth';
 
 const Notifications = () => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
+  const fetchNotifications = useCallback(async () => {
+    const token = getToken();
+    if (!token) {
+      navigate('/login');
+      setLoading(false);
+      return;
+    }
 
-  const fetchNotifications = async () => {
     try {
-      const token = localStorage.getItem('token');
       const res = await axios.get('/api/notifications', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setNotifications(res.data);
     } catch (error) {
       console.error('Error fetching notifications:', error);
+      if (error.response?.status === 401) navigate('/login');
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    queueMicrotask(() => { void fetchNotifications(); });
+  }, [fetchNotifications]);
 
   const markAllRead = async () => {
     try {
-      const token = localStorage.getItem('token');
       await axios.put('/api/notifications/mark-read', {}, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()
       });
       setNotifications(notifications.map(n => ({ ...n, unread: false })));
     } catch (error) {

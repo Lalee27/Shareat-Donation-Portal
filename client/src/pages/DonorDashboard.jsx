@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { getToken, removeToken } from '../utils/auth';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
@@ -60,8 +61,6 @@ const MapResizeHandler = ({ isFullscreen }) => {
 };
 
 const TrackingMap = ({ donation, coords }) => {
-  if (!donation) return null;
-
   const [currentPos, setCurrentPos] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -82,10 +81,9 @@ const TrackingMap = ({ donation, coords }) => {
     }
   };
 
-  // Initial location request
   useEffect(() => {
+    if (!donation) return;
     requestLocation();
-    // Watch for movement
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
         setCurrentPos([position.coords.latitude, position.coords.longitude]);
@@ -94,10 +92,11 @@ const TrackingMap = ({ donation, coords }) => {
       { enableHighAccuracy: true }
     );
     return () => navigator.geolocation.clearWatch(watchId);
-  }, []);
+  }, [donation]);
 
-  const seed = parseInt(donation._id.slice(-6), 16);
-  const defaultDonorPos = [22.2887, 73.3637]; // Default to Parul University area if seed fails
+  if (!donation) return null;
+
+  const defaultDonorPos = [22.2887, 73.3637]; // Default to Parul University area
   const defaultNgoPos = [22.3072, 73.1812]; // Vadodara area
 
   const donorPos = currentPos || (Array.isArray(coords?.donor) ? coords.donor : defaultDonorPos);
@@ -201,7 +200,19 @@ const DonorDashboard = () => {
 
   const navigate = useNavigate();
 
+  // Derive the active donation once so we can use stable IDs as effect deps
+  const activeDonationId = (() => {
+    const d = donations.find(d => d.status !== 'distributed' && d.status !== 'cancelled') || donations[0];
+    return d?._id ?? null;
+  })();
+  const activeDonationNgoId = (() => {
+    const d = donations.find(d => d.status !== 'distributed' && d.status !== 'cancelled') || donations[0];
+    return d?.assignedNgo?._id ?? null;
+  })();
+
   useEffect(() => {
+    if (!activeDonationId) return;
+
     const geocodeAddress = async (addressObj) => {
       if (!addressObj) return null;
       try {
@@ -217,26 +228,25 @@ const DonorDashboard = () => {
     };
 
     const updateCoords = async () => {
-      const activeDonation = donations.find(d => d.status !== 'distributed' && d.status !== 'cancelled') || donations[0];
-      if (activeDonation) {
-        const dCoords = await geocodeAddress(activeDonation.pickupAddress);
-        let nCoords = null;
-        if (activeDonation.assignedNgo?.address) {
-          nCoords = await geocodeAddress(activeDonation.assignedNgo.address);
-        }
-        setActiveCoords({ donor: dCoords, ngo: nCoords });
+      const activeDonation = donations.find(d => d._id === activeDonationId);
+      if (!activeDonation) return;
+      const dCoords = await geocodeAddress(activeDonation.pickupAddress);
+      let nCoords = null;
+      if (activeDonation.assignedNgo?.address) {
+        nCoords = await geocodeAddress(activeDonation.assignedNgo.address);
       }
+      setActiveCoords({ donor: dCoords, ngo: nCoords });
     };
 
-    if (donations.length > 0) {
-      updateCoords();
-    }
-  }, [donations]);
+    updateCoords();
+  // Only re-geocode when the active donation or its NGO actually changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeDonationId, activeDonationNgoId]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         if (!token) {
           navigate('/login');
           return;
@@ -273,7 +283,7 @@ const DonorDashboard = () => {
   const handleCreateDonation = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
       const payload = {
@@ -327,7 +337,7 @@ const DonorDashboard = () => {
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       const res = await axios.put('/api/auth/profile', profileData, { headers: { Authorization: `Bearer ${token}` } });
       setUser(res.data);
       alert('Profile updated successfully!');
@@ -339,7 +349,7 @@ const DonorDashboard = () => {
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       await axios.put('/api/auth/password', passwordData, { headers: { Authorization: `Bearer ${token}` } });
       setPasswordData({ currentPassword: '', newPassword: '' });
       alert('Password updated successfully!');
@@ -354,7 +364,7 @@ const DonorDashboard = () => {
     const formData = new FormData();
     formData.append('avatar', file);
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       const res = await axios.post('/api/auth/profile/avatar', formData, { 
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } 
       });
@@ -367,7 +377,7 @@ const DonorDashboard = () => {
   const handleAvatarDelete = async () => {
     if (!window.confirm('Are you sure you want to delete your profile picture?')) return;
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       const res = await axios.delete('/api/auth/profile/avatar', { 
         headers: { Authorization: `Bearer ${token}` } 
       });
@@ -446,7 +456,7 @@ const DonorDashboard = () => {
               <span className="material-symbols-outlined mr-3 text-sm">add</span>
               New Donation
             </button>
-            <button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} className="w-full text-on-surface-variant hover:bg-surface-variant font-label-md text-label-md py-3 rounded-xl transition-colors duration-200 flex items-center justify-center">
+            <button onClick={() => { removeToken(); navigate('/login'); }} className="w-full text-on-surface-variant hover:bg-surface-variant font-label-md text-label-md py-3 rounded-xl transition-colors duration-200 flex items-center justify-center">
               <span className="material-symbols-outlined mr-3 text-sm">logout</span>
               Logout
             </button>
@@ -600,10 +610,11 @@ const DonorDashboard = () => {
                       muted
                       playsInline
                       className="absolute inset-0 w-full h-full object-cover opacity-90"
-                      poster="https://lh3.googleusercontent.com/aida-public/AB6AXuB9eSA5H-ioNzb4Xiso5GXtNklG7YctXHf4cCtApF8zzLFtjFjWePnUnwuRE28MNo_gBQo0rxIt98SGMlsemgUT4uRaZymVLV2_3jcmFD3OIZ9ZRUhjZcEXsvHo7v1lQVX1Km0r82Azj0eY-cVZwXgG9dwSKr_R8Cdv-gYh7zJRdr1aTFpguHMWwESOCOlfhgUXwL9F9xfhVMYhTfrxOAr6Z7pDtCycKTZTOEPDR4zWDx5L4xr-LBLWsptvDwuQ4N-ySssOPgX9waU"
+                      poster="https://images.unsplash.com/photo-1593113598332-cd288d649433?w=800&q=80&auto=format&fit=crop"
                     >
-                      <source src="/dashboard-video.mp4" type="video/mp4" />
+                      <source src="/landing%20page%20video.mp4" type="video/mp4" />
                     </video>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
                   </div>
                 </div>
               </section>

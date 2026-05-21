@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { useGoogleLogin } from '@react-oauth/google';
+import { setToken, setRole } from '../utils/auth';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -26,8 +26,8 @@ const Login = () => {
         email: mockEmail,
         role: 'donor' // Default role
       });
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('role', res.data.user.role);
+      setToken(res.data.token);
+      setRole(res.data.user.role);
       navigate(`/${res.data.user.role}-dashboard`);
     } catch (err) {
       setError(err.response?.data?.message || 'Simulated Google login failed.');
@@ -46,8 +46,8 @@ const Login = () => {
         email: appleEmail,
         role: 'donor' // Default role
       });
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('role', res.data.user.role);
+      setToken(res.data.token);
+      setRole(res.data.user.role);
       navigate(`/${res.data.user.role}-dashboard`);
     } catch (err) {
       setError(err.response?.data?.message || 'Simulated Apple login failed.');
@@ -59,8 +59,8 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await axios.post('/api/auth/login', { email, password });
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('role', res.data.user.role);
+      setToken(res.data.token);
+      setRole(res.data.user.role);
       navigate(`/${res.data.user.role}-dashboard`);
     } catch (err) {
       if (!err.response) {
@@ -220,7 +220,8 @@ const Login = () => {
           </div>
         </div>
       </div>
-      {/* Google Mock Login Modal */}
+
+      {/* Modals */}
       {showGoogleMock && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity animate-fade-in">
           <div className="bg-white rounded-3xl w-full max-w-[450px] p-10 shadow-2xl flex flex-col items-center animate-slide-up">

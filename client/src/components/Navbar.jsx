@@ -1,21 +1,26 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { getRole, removeToken } from '../utils/auth';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const userRole = localStorage.getItem('role');
+  const userRole = getRole();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
 
   useEffect(() => {
     const path = location.pathname;
-    if (path === '/') setActiveTab('home');
-    else if (path === '/about') setActiveTab('about');
-    else if (path === '/for-ngos') setActiveTab('ngos');
-    else if (path === '/how-it-works') setActiveTab('how-it-works');
-    else if (path === '/impact') setActiveTab('impact');
+    const tabByPath = {
+      '/': 'home',
+      '/about': 'about',
+      '/for-ngos': 'ngos',
+      '/how-it-works': 'how-it-works',
+      '/impact': 'impact',
+    };
+    const nextTab = tabByPath[path];
+    if (nextTab) queueMicrotask(() => setActiveTab(nextTab));
   }, [location.pathname]);
 
   useEffect(() => {
@@ -59,8 +64,7 @@ const Navbar = () => {
   }, [location.pathname]);
 
   const handleLogout = () => {
-    localStorage.removeItem('role');
-    localStorage.removeItem('token');
+    removeToken();
     navigate('/');
   };
 

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
+import { setToken, setRole } from '../utils/auth';
 
 const VerifyEmail = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -30,7 +31,7 @@ const VerifyEmail = () => {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
     } else {
-      setCanResend(true);
+      queueMicrotask(() => setCanResend(true));
     }
   }, [countdown]);
 
@@ -98,8 +99,8 @@ const VerifyEmail = () => {
       setSuccess('Email verified successfully! Redirecting...');
       
       // Auto-login: save token and redirect to dashboard
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('role', res.data.user.role);
+      setToken(res.data.token);
+      setRole(res.data.user.role);
       
       setTimeout(() => {
         navigate(`/${res.data.user.role}-dashboard`);

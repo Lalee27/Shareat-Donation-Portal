@@ -12,9 +12,6 @@ export default defineConfig({
   ],
   server: {
     host: true,           // Listen on all interfaces (needed for Docker)
-    watch: {
-      usePolling: true,   // Detect file changes via Docker volume mounts
-    },
     proxy: {
       '/api': {
         target: target,

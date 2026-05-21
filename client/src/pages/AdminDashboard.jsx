@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { getToken, removeToken, getAuthHeaders } from '../utils/auth';
 
 const API = '/api';
 
@@ -12,9 +13,6 @@ export default function AdminDashboard() {
   const [toast, setToast] = useState(null);
   const navigate = useNavigate();
 
-  const token = localStorage.getItem('token');
-  const cfg = { headers: { Authorization: `Bearer ${token}` } };
-
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
@@ -22,12 +20,16 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const fetchAdminData = async () => {
-      try {
-        if (!token) {
-          navigate('/login');
-          return;
-        }
+      const token = getToken();
+      if (!token) {
+        navigate('/login');
+        setLoading(false);
+        return;
+      }
 
+      const cfg = { headers: { Authorization: `Bearer ${token}` } };
+
+      try {
         const [statsRes, usersRes] = await Promise.all([
           axios.get(`${API}/admin/stats`, cfg),
           axios.get(`${API}/admin/users?role=ngo`, cfg)
@@ -48,10 +50,10 @@ export default function AdminDashboard() {
 
   const toggleNgoVerification = async (id, currentStatus) => {
     try {
-      const res = await axios.put(`${API}/admin/users/${id}/verify`, { isVerified: !currentStatus }, cfg);
+      const res = await axios.put(`${API}/admin/users/${id}/verify`, { isVerified: !currentStatus }, { headers: getAuthHeaders() });
       setNgos(ngos.map(ngo => ngo._id === id ? res.data : ngo));
       
-      const statsRes = await axios.get(`${API}/admin/stats`, cfg);
+      const statsRes = await axios.get(`${API}/admin/stats`, { headers: getAuthHeaders() });
       setStats(statsRes.data);
       
       showToast(currentStatus ? 'NGO Verification Revoked' : 'NGO Verified Successfully');
@@ -62,7 +64,7 @@ export default function AdminDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    removeToken();
     navigate('/login');
   };
 

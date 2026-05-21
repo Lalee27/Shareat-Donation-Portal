@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { getToken, removeToken } from '../utils/auth';
 
 const API = '/api';
 
@@ -34,7 +35,7 @@ export default function NGODashboard() {
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const navigate = useNavigate();
 
-  const token = localStorage.getItem('token');
+  const token = getToken();
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -81,7 +82,7 @@ export default function NGODashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    removeToken();
     navigate('/login');
   };
 
@@ -306,7 +307,7 @@ export default function NGODashboard() {
                   {donations.filter(d => d.status === 'pending').length === 0 ? (
                     <div className="col-span-full p-8 text-center text-on-surface-variant bg-surface rounded-xl shadow-[0px_4px_20px_rgba(26,35,126,0.05)]">No available donations right now.</div>
                   ) : (
-                    donations.filter(d => d.status === 'pending').slice(0, 6).map((d, index) => {
+                    donations.filter(d => d.status === 'pending').slice(0, 6).map((d) => {
                       const mainItem = d.items[0];
                       const categoryImages = {
                         household: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=400&q=80',
