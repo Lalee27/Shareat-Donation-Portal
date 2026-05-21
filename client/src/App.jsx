@@ -2,6 +2,7 @@ import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Eagerly load lightweight public pages
 import Home from './pages/Home';
@@ -57,6 +58,7 @@ function AppContent() {
     <div className="flex flex-col min-h-screen">
       {!isDashboard && <Navbar />}
       <main className="flex-grow">
+        <ErrorBoundary>
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -81,6 +83,7 @@ function AppContent() {
             <Route path="/notifications" element={<Notifications />} />
           </Routes>
         </Suspense>
+        </ErrorBoundary>
       </main>
       {!isDashboard && <Footer />}
     </div>
