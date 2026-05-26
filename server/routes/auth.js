@@ -59,7 +59,7 @@ router.post('/register', async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ $or: [{ email }, { secondaryEmails: email }] });
     if (existingUser) {
       // Agar user hai but email verified nahi hai, toh usse dubara OTP bhejo
       if (!existingUser.isEmailVerified) {
@@ -231,7 +231,7 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     // Find user
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ $or: [{ email }, { secondaryEmails: email }] });
     if (!user) {
       return res.status(400).json({ message: 'Invalid email or password.' });
     }
@@ -294,7 +294,7 @@ router.post('/google', async (req, res) => {
     const { email, name, picture } = payload;
 
     // Check if user exists
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ $or: [{ email }, { secondaryEmails: email }] });
     
     if (!user) {
       // If user doesn't exist, create a new one
@@ -335,7 +335,7 @@ router.post('/google-demo', async (req, res) => {
     const picture = 'https://ui-avatars.com/api/?name=' + name; // Mock avatar
 
     // Check if user exists
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ $or: [{ email }, { secondaryEmails: email }] });
     
     if (!user) {
       // Create bypassed user
@@ -375,7 +375,7 @@ router.post('/apple-demo', async (req, res) => {
     const picture = 'https://ui-avatars.com/api/?name=' + name + '&background=000000&color=ffffff'; // Mock Apple avatar
 
     // Check if user exists
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ $or: [{ email }, { secondaryEmails: email }] });
     
     if (!user) {
       // Create bypassed user
@@ -532,6 +532,160 @@ router.delete('/account', auth, async (req, res) => {
   } catch (error) {
     console.error('Account deletion error:', error);
     res.status(500).json({ message: 'Server error deleting account' });
+  }
+});
+
+// POST /api/auth/emails - Add a secondary email
+router.post('/emails', auth, async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+
+    const lowerEmail = email.toLowerCase().trim();
+
+    // Check if email already in use
+    const existingUser = await User.findOne({ $or: [{ email: lowerEmail }, { secondaryEmails: lowerEmail }] });
+    if (existingUser) {
+      return res.status(400).json({ message: 'This email is already registered.' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user.secondaryEmails) user.secondaryEmails = [];
+    user.secondaryEmails.push(lowerEmail);
+    await user.save();
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Error adding email' });
+  }
+});
+
+// DELETE /api/auth/emails/:email - Remove a secondary email
+router.delete('/emails/:email', auth, async (req, res) => {
+  try {
+    const emailToRemove = req.params.email.toLowerCase().trim();
+    const user = await User.findById(req.user._id);
+    
+    if (user.secondaryEmails && user.secondaryEmails.includes(emailToRemove)) {
+      user.secondaryEmails = user.secondaryEmails.filter(e => e !== emailToRemove);
+      await user.save();
+    }
+    
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Error removing email' });
+  }
+});
+
+// POST /api/auth/forgot-password - Request password reset OTP
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required.' });
+
+    const lowerEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ $or: [{ email: lowerEmail }, { secondaryEmails: lowerEmail }] });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found with this email.' });
+    }
+
+    const otp = generateOTP();
+    user.resetPasswordCode = otp;
+    user.resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 min expiry
+    await user.save();
+
+    await sendEmail({
+      email: user.email,
+      subject: 'Shareat - Password Reset Code',
+      message: `Hello ${user.name},\n\nYour password reset code is: ${otp}\n\nThis code will expire in 10 minutes.\n\nIf you didn't request a password reset, you can safely ignore this email.\n\n- Shareat Team`
+    });
+
+    res.json({ message: 'Password reset code sent to your email.' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Server error requesting password reset.' });
+  }
+});
+
+// POST /api/auth/reset-password - Reset password using OTP
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ message: 'Email, code, and new password are required.' });
+    }
+
+    const lowerEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ $or: [{ email: lowerEmail }, { secondaryEmails: lowerEmail }] });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    if (user.resetPasswordCode !== code) {
+      return res.status(400).json({ message: 'Invalid reset code.' });
+    }
+
+    if (user.resetPasswordExpires && user.resetPasswordExpires < new Date()) {
+      return res.status(400).json({ message: 'Reset code has expired. Please request a new one.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    
+    // Clear reset tokens
+    user.resetPasswordCode = undefined;
+    user.resetPasswordExpires = undefined;
+    
+    await user.save();
+
+    res.json({ message: 'Password reset successful. You can now log in.' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: 'Server error resetting password.' });
+  }
+});
+
+// GET /api/auth/preferences - Load user preferences
+router.get('/preferences', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('preferences');
+    // Return defaults if preferences not yet saved
+    const prefs = user.preferences || {
+      notifications: { email: true, push: true, impact: true },
+      darkMode: false,
+      twoFactorEnabled: false,
+      loginAlerts: true,
+    };
+    res.json(prefs);
+  } catch (error) {
+    console.error('Error fetching preferences:', error);
+    res.status(500).json({ message: 'Server error fetching preferences.' });
+  }
+});
+
+// PUT /api/auth/preferences - Save user preferences
+router.put('/preferences', auth, async (req, res) => {
+  try {
+    const { notifications, darkMode, twoFactorEnabled, loginAlerts } = req.body;
+    const updates = {};
+
+    if (notifications !== undefined) updates['preferences.notifications'] = notifications;
+    if (darkMode !== undefined) updates['preferences.darkMode'] = darkMode;
+    if (twoFactorEnabled !== undefined) updates['preferences.twoFactorEnabled'] = twoFactorEnabled;
+    if (loginAlerts !== undefined) updates['preferences.loginAlerts'] = loginAlerts;
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: updates },
+      { new: true }
+    ).select('preferences');
+
+    res.json(user.preferences);
+  } catch (error) {
+    console.error('Error saving preferences:', error);
+    res.status(500).json({ message: 'Server error saving preferences.' });
   }
 });
 

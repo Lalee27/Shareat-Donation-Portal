@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -75,9 +76,9 @@ export default function NGODashboard() {
       } catch (err) {
         console.error("Error updating unread count:", err);
       }
-      alert(`Status updated to "${status}"`);
+      toast.success(`Status updated to "${status}"`);
     } catch {
-      alert('Failed to update status.');
+      toast.error('Failed to update status.');
     }
   };
 
@@ -105,7 +106,7 @@ export default function NGODashboard() {
       const res = await axios.post(`${API}/auth/profile/avatar`, formData, cfg);
       setUser(res.data);
     } catch {
-      alert('Failed to upload avatar');
+      toast.error('Failed to upload avatar');
     }
   };
 
@@ -115,14 +116,14 @@ export default function NGODashboard() {
       const cfg = { headers: { Authorization: `Bearer ${token}` } };
       const res = await axios.delete(`${API}/auth/profile/avatar`, cfg);
       setUser(res.data);
-      alert('Profile picture deleted');
+      toast.success('Profile picture deleted');
     } catch {
-      alert('Failed to delete avatar');
+      toast.error('Failed to delete avatar');
     }
   };
 
   const exportToCSV = () => {
-    if (filtered.length === 0) return alert('No data to export');
+    if (filtered.length === 0) return toast.error('No data to export');
     const headers = ['Donor Name', 'City', 'Items', 'Status', 'Pickup Date', 'Time Slot'];
     const rows = filtered.map(d => [
       d.donor?.name || 'Unknown',
@@ -148,7 +149,7 @@ export default function NGODashboard() {
       navigator.share({ title: 'Our Impact on Shareat', text }).catch(console.error);
     } else {
       navigator.clipboard.writeText(text);
-      alert('Impact summary copied to clipboard!');
+      toast.success('Impact summary copied to clipboard!');
     }
   };
 

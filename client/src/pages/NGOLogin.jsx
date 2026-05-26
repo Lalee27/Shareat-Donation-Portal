@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { setToken, setRole, removeToken } from '../utils/auth';
+import ForgotPasswordModal from '../components/ForgotPasswordModal';
 
 const NGOLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -82,7 +84,7 @@ const NGOLogin = () => {
               <div className="flex flex-col gap-[4px]">
                 <div className="flex justify-between items-center">
                   <label className="font-label-md text-[13px] font-medium text-primary" htmlFor="password">Password</label>
-                  <a className="text-[12px] text-secondary-container hover:underline" href="#" onClick={(e) => { e.preventDefault(); alert('Password reset functionality is coming soon!'); }}>Forgot Password?</a>
+                  <a className="text-[12px] text-secondary-container hover:underline" href="#" onClick={(e) => { e.preventDefault(); setShowForgotPassword(true); }}>Forgot Password?</a>
                 </div>
                 <div className="relative">
                   <input 
@@ -110,6 +112,11 @@ const NGOLogin = () => {
           </div>
         </div>
       </div>
+
+      <ForgotPasswordModal 
+        isOpen={showForgotPassword} 
+        onClose={() => setShowForgotPassword(false)} 
+      />
     </main>
   );
 };

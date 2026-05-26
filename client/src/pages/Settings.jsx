@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -12,6 +13,8 @@ const Settings = () => {
     return localStorage.getItem('darkMode') === 'true';
   });
   const [notifications, setNotifications] = useState({ email: true, push: true, impact: true });
+  const [twoFactor, setTwoFactor] = useState(false);
+  const [loginAlerts, setLoginAlerts] = useState(true);
   
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -20,7 +23,41 @@ const Settings = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
+  // Load preferences from backend
+  useEffect(() => {
+    const loadPreferences = async () => {
+      try {
+        const token = getToken();
+        if (!token) return;
+        const res = await axios.get('/api/auth/preferences', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const prefs = res.data;
+        if (prefs.notifications) setNotifications(prefs.notifications);
+        if (prefs.darkMode !== undefined) setDarkMode(prefs.darkMode);
+        if (prefs.twoFactorEnabled !== undefined) setTwoFactor(prefs.twoFactorEnabled);
+        if (prefs.loginAlerts !== undefined) setLoginAlerts(prefs.loginAlerts);
+      } catch (err) {
+        console.error('Error loading preferences:', err);
+      }
+    };
+    loadPreferences();
+  }, []);
 
+  // Helper: save a single preference key to backend
+  const savePreference = async (data) => {
+    try {
+      const token = getToken();
+      await axios.put('/api/auth/preferences', data, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (err) {
+      console.error('Error saving preference:', err);
+      toast.error('Failed to save preference');
+    }
+  };
+
+  // Apply dark mode to DOM + localStorage
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
@@ -31,7 +68,9 @@ const Settings = () => {
   }, [darkMode]);
 
   const toggleDarkMode = () => {
-    setDarkMode(prev => !prev);
+    const newVal = !darkMode;
+    setDarkMode(newVal);
+    savePreference({ darkMode: newVal });
   };
 
   useEffect(() => {
@@ -69,10 +108,10 @@ const Settings = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(res.data);
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('Failed to update profile. Please try again.');
+      toast.error('Failed to update profile. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -95,10 +134,10 @@ const Settings = () => {
         } 
       });
       setUser(res.data);
-      alert('Profile picture updated!');
+      toast.success('Profile picture updated!');
     } catch (error) {
       console.error('Error uploading avatar:', error);
-      alert('Failed to upload avatar');
+      toast.error('Failed to upload avatar');
     } finally {
       setIsUploading(false);
     }
@@ -112,11 +151,11 @@ const Settings = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         removeToken();
-        alert('Your account has been deleted.');
+        toast.success('Your account has been deleted.');
         navigate('/register');
       } catch (error) {
         console.error('Error deleting account:', error);
-        alert('Failed to delete account. Please try again.');
+        toast.error('Failed to delete account. Please try again.');
       }
     }
   };
@@ -140,9 +179,9 @@ const Settings = () => {
         headers: { Authorization: `Bearer ${token}` } 
       });
       setPasswordData({ currentPassword: '', newPassword: '' });
-      alert('Password updated successfully!');
+      toast.success('Password updated successfully!');
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to update password');
+      toast.error(error.response?.data?.message || 'Failed to update password');
     } finally {
       setIsUpdatingPassword(false);
     }
@@ -272,7 +311,7 @@ const Settings = () => {
                   <p className="text-xs text-on-surface-variant">Secure your account</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer scale-90">
-                  <input type="checkbox" className="sr-only peer" />
+                  <input type="checkbox" checked={twoFactor} onChange={() => { const newVal = !twoFactor; setTwoFactor(newVal); savePreference({ twoFactorEnabled: newVal }); toast.success(newVal ? '2FA enabled' : '2FA disabled'); }} className="sr-only peer" />
                   <div className="w-10 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-secondary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
                 </label>
               </div>
@@ -282,7 +321,7 @@ const Settings = () => {
                   <p className="text-xs text-on-surface-variant">Notify on new logins</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer scale-90">
-                  <input type="checkbox" defaultChecked className="sr-only peer" />
+                  <input type="checkbox" checked={loginAlerts} onChange={() => { const newVal = !loginAlerts; setLoginAlerts(newVal); savePreference({ loginAlerts: newVal }); toast.success(newVal ? 'Login alerts enabled' : 'Login alerts disabled'); }} className="sr-only peer" />
                   <div className="w-10 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-secondary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
                 </label>
               </div>
@@ -301,7 +340,11 @@ const Settings = () => {
                     <input 
                       type="checkbox" 
                       checked={notifications[key]} 
-                      onChange={() => setNotifications({...notifications, [key]: !notifications[key]})}
+                      onChange={() => {
+                        const updated = {...notifications, [key]: !notifications[key]};
+                        setNotifications(updated);
+                        savePreference({ notifications: updated });
+                      }}
                       className="sr-only peer" 
                     />
                     <div className="w-10 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-secondary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
@@ -337,8 +380,8 @@ const Settings = () => {
               {[
                 { icon: 'quiz', title: 'FAQs', desc: 'Quick answers', action: () => setIsChatOpen(true) },
                 { icon: 'chat_bubble', title: 'Support', desc: 'Contact our team', action: () => setIsChatOpen(true) },
-                { icon: 'article', title: 'Privacy', desc: 'Data protection', action: () => alert('Privacy Policy will be updated soon.') },
-                { icon: 'gavel', title: 'Terms', desc: 'Usage guidelines', action: () => alert('Terms & Conditions will be updated soon.') },
+                { icon: 'article', title: 'Privacy', desc: 'Data protection', action: () => navigate('/privacy') },
+                { icon: 'gavel', title: 'Terms', desc: 'Usage guidelines', action: () => navigate('/terms') },
               ].map(item => (
                 <div key={item.title} onClick={item.action} className="p-4 bg-white border border-outline-variant/30 rounded-2xl hover:shadow-sm hover:border-primary/50 transition-all cursor-pointer group flex items-center gap-3">
                   <span className="material-symbols-outlined text-secondary text-xl group-hover:scale-110 transition-transform">{item.icon}</span>

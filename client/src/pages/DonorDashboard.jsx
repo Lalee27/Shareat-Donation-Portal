@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -74,7 +75,7 @@ const TrackingMap = ({ donation, coords }) => {
         },
         (error) => {
           console.error("Geolocation error:", error);
-          alert("Please enable location access in your browser settings.");
+          toast("Please enable location access in your browser settings.");
         },
         { enableHighAccuracy: true }
       );
@@ -179,6 +180,7 @@ const DonorDashboard = () => {
   const [user, setUser] = useState(null);
   const [profileData, setProfileData] = useState({ name: '', phone: '', address: { street: '', city: '', state: '', pincode: '' } });
   const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '' });
+  const [newEmail, setNewEmail] = useState('');
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   
@@ -330,7 +332,7 @@ const DonorDashboard = () => {
       });
     } catch (error) {
       console.error('Error creating donation:', error);
-      alert('Failed to create donation. Please try again.');
+      toast.error('Failed to create donation. Please try again.');
     }
   };
 
@@ -340,9 +342,9 @@ const DonorDashboard = () => {
       const token = getToken();
       const res = await axios.put('/api/auth/profile', profileData, { headers: { Authorization: `Bearer ${token}` } });
       setUser(res.data);
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     } catch {
-      alert('Failed to update profile');
+      toast.error('Failed to update profile');
     }
   };
 
@@ -352,9 +354,35 @@ const DonorDashboard = () => {
       const token = getToken();
       await axios.put('/api/auth/password', passwordData, { headers: { Authorization: `Bearer ${token}` } });
       setPasswordData({ currentPassword: '', newPassword: '' });
-      alert('Password updated successfully!');
+      toast.success('Password updated successfully!');
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to update password');
+      toast.error(error.response?.data?.message || 'Failed to update password');
+    }
+  };
+
+  const handleAddEmail = async (e) => {
+    e.preventDefault();
+    if (!newEmail) return;
+    try {
+      const token = getToken();
+      const res = await axios.post('/api/auth/emails', { email: newEmail }, { headers: { Authorization: `Bearer ${token}` } });
+      setUser(res.data);
+      setNewEmail('');
+      toast.success('Email added successfully!');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to add email');
+    }
+  };
+
+  const handleRemoveEmail = async (emailToRemove) => {
+    if (!window.confirm(`Are you sure you want to remove ${emailToRemove}?`)) return;
+    try {
+      const token = getToken();
+      const res = await axios.delete(`/api/auth/emails/${encodeURIComponent(emailToRemove)}`, { headers: { Authorization: `Bearer ${token}` } });
+      setUser(res.data);
+      toast.success('Email removed successfully!');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to remove email');
     }
   };
 
@@ -370,7 +398,7 @@ const DonorDashboard = () => {
       });
       setUser(res.data);
     } catch {
-      alert('Failed to upload avatar');
+      toast.error('Failed to upload avatar');
     }
   };
 
@@ -382,9 +410,9 @@ const DonorDashboard = () => {
         headers: { Authorization: `Bearer ${token}` } 
       });
       setUser(res.data);
-      alert('Profile picture deleted');
+      toast.success('Profile picture deleted');
     } catch {
-      alert('Failed to delete avatar');
+      toast.error('Failed to delete avatar');
     }
   };
 
@@ -465,7 +493,7 @@ const DonorDashboard = () => {
       </nav>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-h-screen relative z-30 bg-background overflow-hidden" style={{ marginLeft: '256px' }}>
+      <main className="flex-1 flex flex-col min-h-screen relative z-30 bg-background overflow-hidden md:ml-64">
         
         {/* Web TopAppBar */}
         <div className="hidden md:flex bg-white shadow-sm border-b border-outline-variant/30 justify-between items-center px-6 h-16 w-full sticky top-0 z-30">
@@ -480,9 +508,50 @@ const DonorDashboard = () => {
               )}
             </div>
             <span onClick={() => navigate('/settings')} className="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high rounded-full p-2 transition-all duration-200">settings</span>
-            <img onClick={() => setActiveTab('profile')} alt="User Avatar" className="w-8 h-8 rounded-full border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCW00rc3lCQ27PL_Q9hQIUM5BNkD87m3NVcioH_4vRyY0zo-SKwVWh2xNJCYYFlXiMLCLHVNZnefGXDlGiX0G4_-8KaZFE7eFOkPNgYbfhYYaf7GD64Ll1Ispt94GEia8EClZhx8Ty_fIL0VMm5KXg5cp7tAId-TO_Q66jbXrzYEWoIookjFtjIkWr0AoP1rUVQlK6O41kXp7Rc1mc4noL2P_RVoxdLc8JVMxtldhKG_puYk5EGZxxplQLfZ1gqPTHn2PbD7Vg2xAU" />
+            <img onClick={() => setActiveTab('profile')} alt="User Avatar" className="w-8 h-8 rounded-full border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary transition-all" src={user?.avatar ? (user.avatar.startsWith('http') ? user.avatar : user.avatar) : "https://lh3.googleusercontent.com/aida-public/AB6AXuCW00rc3lCQ27PL_Q9hQIUM5BNkD87m3NVcioH_4vRyY0zo-SKwVWh2xNJCYYFlXiMLCLHVNZnefGXDlGiX0G4_-8KaZFE7eFOkPNgYbfhYYaf7GD64Ll1Ispt94GEia8EClZhx8Ty_fIL0VMm5KXg5cp7tAId-TO_Q66jbXrzYEWoIookjFtjIkWr0AoP1rUVQlK6O41kXp7Rc1mc4noL2P_RVoxdLc8JVMxtldhKG_puYk5EGZxxplQLfZ1gqPTHn2PbD7Vg2xAU"} />
           </div>
         </div>
+
+        {/* Mobile TopAppBar */}
+        <div className="flex md:hidden bg-white shadow-sm border-b border-outline-variant/30 justify-between items-center px-4 h-16 w-full sticky top-0 z-40">
+          <div className="font-h3 text-xl font-bold text-primary">Shareat</div>
+          <div className="flex items-center space-x-2">
+            <div className="relative">
+              <span onClick={() => navigate('/notifications')} className="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high rounded-full p-2 transition-all duration-200">notifications</span>
+              {unreadNotifications > 0 && (
+                <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-secondary text-white text-[9px] font-bold rounded-full flex items-center justify-center pointer-events-none">
+                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                </span>
+              )}
+            </div>
+            <span onClick={() => navigate('/settings')} className="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high rounded-full p-2 transition-all duration-200">settings</span>
+            <img onClick={() => setActiveTab('profile')} alt="User Avatar" className="w-8 h-8 rounded-full border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary transition-all" src={user?.avatar ? (user.avatar.startsWith('http') ? user.avatar : user.avatar) : "https://lh3.googleusercontent.com/aida-public/AB6AXuCW00rc3lCQ27PL_Q9hQIUM5BNkD87m3NVcioH_4vRyY0zo-SKwVWh2xNJCYYFlXiMLCLHVNZnefGXDlGiX0G4_-8KaZFE7eFOkPNgYbfhYYaf7GD64Ll1Ispt94GEia8EClZhx8Ty_fIL0VMm5KXg5cp7tAId-TO_Q66jbXrzYEWoIookjFtjIkWr0AoP1rUVQlK6O41kXp7Rc1mc4noL2P_RVoxdLc8JVMxtldhKG_puYk5EGZxxplQLfZ1gqPTHn2PbD7Vg2xAU"} />
+          </div>
+        </div>
+
+        {/* Mobile Bottom Navigation Bar */}
+        <nav className="flex md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-outline-variant/30 justify-around items-center py-2 z-40 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
+          <button onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center py-1 flex-1 ${activeTab === 'dashboard' ? 'text-primary' : 'text-on-surface-variant'}`}>
+            <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: activeTab === 'dashboard' ? "'FILL' 1" : "'FILL' 0" }}>dashboard</span>
+            <span className="text-[10px] font-bold mt-0.5">Home</span>
+          </button>
+          <button onClick={() => setActiveTab('donations')} className={`flex flex-col items-center py-1 flex-1 ${activeTab === 'donations' ? 'text-primary' : 'text-on-surface-variant'}`}>
+            <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: activeTab === 'donations' ? "'FILL' 1" : "'FILL' 0" }}>volunteer_activism</span>
+            <span className="text-[10px] font-bold mt-0.5">Donations</span>
+          </button>
+          <button onClick={() => setActiveTab('pickup')} className={`flex flex-col items-center py-1 flex-1 ${activeTab === 'pickup' ? 'text-primary' : 'text-on-surface-variant'}`}>
+            <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: activeTab === 'pickup' ? "'FILL' 1" : "'FILL' 0" }}>add_circle</span>
+            <span className="text-[10px] font-bold mt-0.5">Donate</span>
+          </button>
+          <button onClick={() => setActiveTab('impact')} className={`flex flex-col items-center py-1 flex-1 ${activeTab === 'impact' ? 'text-primary' : 'text-on-surface-variant'}`}>
+            <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: activeTab === 'impact' ? "'FILL' 1" : "'FILL' 0" }}>monitoring</span>
+            <span className="text-[10px] font-bold mt-0.5">Impact</span>
+          </button>
+          <button onClick={() => setActiveTab('profile')} className={`flex flex-col items-center py-1 flex-1 ${activeTab === 'profile' ? 'text-primary' : 'text-on-surface-variant'}`}>
+            <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: activeTab === 'profile' ? "'FILL' 1" : "'FILL' 0" }}>person</span>
+            <span className="text-[10px] font-bold mt-0.5">Profile</span>
+          </button>
+        </nav>
 
         {/* Decorative background circles matching design */}
         <div aria-hidden="true" className="pointer-events-none select-none absolute inset-0 overflow-hidden z-0">
@@ -493,7 +562,7 @@ const DonorDashboard = () => {
           <div className="absolute bottom-1/3 -left-16 w-[250px] h-[250px] rounded-full border-[20px] border-[#F57C00]/5"></div>
         </div>
 
-        <div className="p-8 max-w-container-max mx-auto w-full space-y-8 flex-grow pb-24 relative z-10">
+        <div className="p-4 md:p-8 max-w-container-max mx-auto w-full space-y-8 flex-grow pb-32 md:pb-24 relative z-10">
           
           {activeTab === 'pickup' && (
             <div className="bg-surface p-8 rounded-xl shadow-[0px_4px_20px_rgba(26,35,126,0.05)] border-t-4 border-[#F57C00] animate-fade-in relative z-20">
@@ -741,7 +810,7 @@ const DonorDashboard = () => {
                     </thead>
                     <tbody className="font-body-md text-body-md text-on-surface">
                       {donations.length === 0 ? (
-                        <tr><td colSpan="4" className="p-8 text-center text-on-surface-variant">No donations found.</td></tr>
+                        <tr><td colSpan="5" className="p-8 text-center text-on-surface-variant">No donations found.</td></tr>
                       ) : (
                         donations.map(d => (
                           <tr key={d._id} className="hover:bg-surface-container-lowest transition-colors group cursor-pointer border-b border-outline-variant/10">
@@ -806,7 +875,7 @@ const DonorDashboard = () => {
                   </thead>
                   <tbody className="font-body-md text-body-md text-on-surface">
                     {donations.length === 0 ? (
-                      <tr><td colSpan="4" className="p-8 text-center text-on-surface-variant">No donations found.</td></tr>
+                      <tr><td colSpan="5" className="p-8 text-center text-on-surface-variant">No donations found.</td></tr>
                     ) : (
                       donations.map(d => (
                         <tr key={d._id} className="hover:bg-surface-container-lowest transition-colors group cursor-pointer border-b border-outline-variant/10">
@@ -998,27 +1067,31 @@ const DonorDashboard = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <label className="block font-label-md text-primary mb-1">Full Name</label>
-                        <input type="text" required value={profileData.name} onChange={e => setProfileData({...profileData, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-secondary focus:border-secondary bg-white text-on-surface" />
+                        <input type="text" required value={profileData.name || ''} onChange={e => setProfileData({...profileData, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-secondary focus:border-secondary bg-white text-on-surface" />
                       </div>
                       <div>
                         <label className="block font-label-md text-primary mb-1">Email</label>
-                        <input type="email" value={user?.email} disabled className="w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface-container text-on-surface-variant opacity-70 cursor-not-allowed" />
+                        <input type="email" value={user?.email || ''} disabled className="w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface-container text-on-surface-variant opacity-70 cursor-not-allowed" />
                       </div>
                       <div className="md:col-span-2">
                         <label className="block font-label-md text-primary mb-1">Phone Number</label>
-                        <input type="text" value={profileData.phone} onChange={e => setProfileData({...profileData, phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-secondary focus:border-secondary bg-white text-on-surface" />
+                        <input type="text" value={profileData.phone || ''} onChange={e => setProfileData({...profileData, phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-secondary focus:border-secondary bg-white text-on-surface" />
                       </div>
                       <div className="md:col-span-2">
                         <label className="block font-label-md text-primary mb-1">Street Address</label>
-                        <input type="text" value={profileData.address?.street} onChange={e => setProfileData({...profileData, address: {...profileData.address, street: e.target.value}})} className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-secondary focus:border-secondary bg-white text-on-surface" />
+                        <input type="text" value={profileData.address?.street || ''} onChange={e => setProfileData({...profileData, address: { ...(profileData.address || {}), street: e.target.value }})} className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-secondary focus:border-secondary bg-white text-on-surface" />
                       </div>
                       <div>
                         <label className="block font-label-md text-primary mb-1">City</label>
-                        <input type="text" value={profileData.address?.city} onChange={e => setProfileData({...profileData, address: {...profileData.address, city: e.target.value}})} className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-secondary focus:border-secondary bg-white text-on-surface" />
+                        <input type="text" value={profileData.address?.city || ''} onChange={e => setProfileData({...profileData, address: { ...(profileData.address || {}), city: e.target.value }})} className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-secondary focus:border-secondary bg-white text-on-surface" />
                       </div>
                       <div>
                         <label className="block font-label-md text-primary mb-1">State</label>
-                        <input type="text" value={profileData.address?.state} onChange={e => setProfileData({...profileData, address: {...profileData.address, state: e.target.value}})} className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-secondary focus:border-secondary bg-white text-on-surface" />
+                        <input type="text" value={profileData.address?.state || ''} onChange={e => setProfileData({...profileData, address: { ...(profileData.address || {}), state: e.target.value }})} className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-secondary focus:border-secondary bg-white text-on-surface" />
+                      </div>
+                      <div>
+                        <label className="block font-label-md text-primary mb-1">Pincode</label>
+                        <input type="text" value={profileData.address?.pincode || ''} onChange={e => setProfileData({...profileData, address: { ...(profileData.address || {}), pincode: e.target.value }})} className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-secondary focus:border-secondary bg-white text-on-surface" />
                       </div>
                     </div>
                     <div className="flex justify-end">
@@ -1042,6 +1115,44 @@ const DonorDashboard = () => {
                       <button type="submit" className="bg-[#F57C00] text-white px-8 py-3 rounded-xl font-label-md hover:bg-[#BF360C] transition-colors shadow-md">Update Password</button>
                     </div>
                   </form>
+
+                  <div className="space-y-6 mt-8">
+                    <h3 className="font-h3 text-lg text-primary border-b border-outline-variant/30 pb-2">Linked Emails</h3>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center bg-gray-50 px-4 py-3 rounded-xl border border-outline-variant">
+                        <div>
+                          <span className="text-on-surface font-medium">{user?.email}</span>
+                          <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Primary</span>
+                        </div>
+                      </div>
+                      
+                      {user?.secondaryEmails && user.secondaryEmails.map((email, idx) => (
+                        <div key={idx} className="flex justify-between items-center bg-white px-4 py-3 rounded-xl border border-outline-variant">
+                          <span className="text-on-surface">{email}</span>
+                          <button 
+                            type="button" 
+                            onClick={() => handleRemoveEmail(email)}
+                            className="text-red-500 hover:text-red-700 text-sm font-medium transition-colors"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <form onSubmit={handleAddEmail} className="mt-4 flex gap-4">
+                      <input 
+                        type="email" 
+                        placeholder="Add secondary email"
+                        value={newEmail} 
+                        onChange={e => setNewEmail(e.target.value)} 
+                        className="flex-1 px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-secondary focus:border-secondary bg-white text-on-surface" 
+                      />
+                      <button type="submit" disabled={!newEmail} className="bg-secondary text-white px-6 py-3 rounded-xl font-label-md hover:bg-[#00897B] transition-colors shadow-md disabled:opacity-50">
+                        Add Email
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>

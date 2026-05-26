@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { setToken, setRole } from '../utils/auth';
+import ForgotPasswordModal from '../components/ForgotPasswordModal';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ const Login = () => {
   const [showAppleMock, setShowAppleMock] = useState(false);
   const [mockEmail, setMockEmail] = useState('');
   const [appleEmail, setAppleEmail] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleMockSubmit = async (e) => {
@@ -151,7 +153,7 @@ const Login = () => {
               <div className="flex flex-col gap-[4px]">
                 <div className="flex justify-between items-center">
                   <label className="font-label-md text-[13px] leading-[1.4] font-medium tracking-[0.01em] text-primary" htmlFor="password">Password</label>
-                  <a className="font-caption text-[12px] leading-[1.4] text-secondary-container hover:text-secondary transition-colors font-medium" href="#" onClick={(e) => { e.preventDefault(); alert('Password reset functionality is coming soon! Please contact support for assistance.'); }}>Forgot Password?</a>
+                  <a className="font-caption text-[12px] leading-[1.4] text-secondary-container hover:text-secondary transition-colors font-medium" href="#" onClick={(e) => { e.preventDefault(); setShowForgotPassword(true); }}>Forgot Password?</a>
                 </div>
                 <div className="relative">
                   <input 
@@ -288,6 +290,11 @@ const Login = () => {
           </div>
         </div>
       )}
+
+      <ForgotPasswordModal 
+        isOpen={showForgotPassword} 
+        onClose={() => setShowForgotPassword(false)} 
+      />
     </main>
   );
 };

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
+import { Toaster } from 'react-hot-toast';
 
 // Eagerly load lightweight public pages
 import Home from './pages/Home';
@@ -39,7 +40,17 @@ const PageLoader = () => (
 
 function AppContent() {
   const location = useLocation();
-  const isDashboard = location.pathname.includes('-dashboard');
+  
+  // List of routes/substrings that should hide the public Navbar and Footer
+  const hideHeaderFooter = [
+    '-dashboard',
+    '/login',
+    '/ngo-login',
+    '/register',
+    '/verify-email',
+    '/settings',
+    '/notifications'
+  ].some(route => location.pathname.includes(route) || location.pathname.startsWith(route));
 
   useEffect(() => {
     try {
@@ -56,7 +67,8 @@ function AppContent() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {!isDashboard && <Navbar />}
+      <Toaster position="top-right" />
+      {!hideHeaderFooter && <Navbar />}
       <main className="flex-grow">
         <ErrorBoundary>
         <Suspense fallback={<PageLoader />}>
@@ -85,7 +97,7 @@ function AppContent() {
         </Suspense>
         </ErrorBoundary>
       </main>
-      {!isDashboard && <Footer />}
+      {!hideHeaderFooter && <Footer />}
     </div>
   );
 }
