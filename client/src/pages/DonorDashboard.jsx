@@ -101,7 +101,9 @@ const TrackingMap = ({ donation, coords }) => {
   const defaultNgoPos = [22.3072, 73.1812]; // Vadodara area
 
   const donorPos = currentPos || (Array.isArray(coords?.donor) ? coords.donor : defaultDonorPos);
-  const ngoPos = Array.isArray(coords?.ngo) ? coords.ngo : defaultNgoPos;
+  const ngoPos = donation.assignedNgo
+    ? (Array.isArray(coords?.ngo) ? coords.ngo : defaultNgoPos)
+    : null;
   
   return (
     <div 
@@ -748,6 +750,69 @@ const DonorDashboard = () => {
                             <span className={`font-caption text-caption mt-xs text-center w-20 ${activeDonation.status === 'distributed' ? 'text-[#F57C00] font-bold' : 'text-on-surface-variant'}`}>Delivered</span>
                           </div>
                         </div>
+
+                        {/* Timeline / Activity Log */}
+                        {activeDonation.statusHistory && activeDonation.statusHistory.length > 0 && (
+                          <div className="mt-6 border-t border-outline-variant/30 pt-6">
+                            <h3 className="text-xs font-bold text-primary mb-4 flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[16px] text-primary">history</span>
+                              Status Timeline & Notes
+                            </h3>
+                            <div className="relative pl-6 border-l-2 border-outline-variant/40 space-y-4 ml-2">
+                              {[...activeDonation.statusHistory].reverse().map((history, idx) => {
+                                let icon = 'info';
+                                let colorClass = 'bg-surface-variant text-on-surface-variant';
+                                if (history.status === 'pending') {
+                                  icon = 'schedule';
+                                  colorClass = 'bg-[#F57C00]/10 text-[#F57C00] border-[#F57C00]/20';
+                                } else if (history.status === 'accepted') {
+                                  icon = 'handshake';
+                                  colorClass = 'bg-primary/10 text-primary border-primary/20';
+                                } else if (history.status === 'collected') {
+                                  icon = 'directions_car';
+                                  colorClass = 'bg-secondary/10 text-secondary border-secondary/20';
+                                } else if (history.status === 'distributed') {
+                                  icon = 'inventory';
+                                  colorClass = 'bg-green-500/10 text-green-600 border-green-500/20';
+                                } else if (history.status === 'cancelled') {
+                                  icon = 'cancel';
+                                  colorClass = 'bg-red-500/10 text-red-600 border-red-500/20';
+                                }
+
+                                return (
+                                  <div key={idx} className="relative">
+                                    {/* Circle Icon Indicator */}
+                                    <div className={`absolute -left-[35px] top-0.5 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-sm ${colorClass}`}>
+                                      <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>{icon}</span>
+                                    </div>
+                                    
+                                    {/* Timeline Details */}
+                                    <div>
+                                      <div className="flex flex-wrap items-baseline gap-2">
+                                        <span className="font-semibold text-xs capitalize text-on-surface">
+                                          {history.status === 'collected' ? 'Out for Pickup' : history.status === 'distributed' ? 'Delivered & Distributed' : history.status}
+                                        </span>
+                                        <span className="text-[10px] text-on-surface-variant">
+                                          {new Date(history.timestamp).toLocaleString(undefined, {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                          })}
+                                        </span>
+                                      </div>
+                                      {history.note && (
+                                        <p className="text-[11px] text-on-surface-variant mt-0.5 italic font-medium">
+                                          "{history.note}"
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       <div className="h-[300px] relative">

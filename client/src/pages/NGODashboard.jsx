@@ -34,9 +34,14 @@ export default function NGODashboard() {
   const [loading, setLoading]   = useState(true);
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [statusNote, setStatusNote] = useState('');
   const navigate = useNavigate();
 
   const token = getToken();
+
+  useEffect(() => {
+    setStatusNote('');
+  }, [selected]);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -788,8 +793,27 @@ export default function NGODashboard() {
                       </div>
                     </div>
                   </div>
-
                 </div>
+
+                {['pending', 'accepted', 'collected'].includes(selected.status) && (
+                  <div className="mt-4 p-4 bg-surface rounded-2xl border border-outline-variant/30 space-y-2">
+                    <label className="block text-xs font-bold text-[#F57C00] uppercase tracking-wider">
+                      Status Update Note (Optional)
+                    </label>
+                    <textarea
+                      placeholder={
+                        selected.status === 'pending' ? "E.g., Scheduled pickup for Sunday morning" :
+                        selected.status === 'accepted' ? "E.g., Picked up items from donor's location" :
+                        "E.g., Distributed clothes and toys to 5 local families"
+                      }
+                      rows="2"
+                      value={statusNote}
+                      onChange={(e) => setStatusNote(e.target.value)}
+                      className="w-full px-4 py-2.5 text-sm rounded-xl border border-outline-variant focus:ring-2 focus:ring-secondary focus:border-secondary bg-white text-on-surface resize-none"
+                    />
+                  </div>
+                )}
+
               </div>
 
               {/* Modal Actions */}
@@ -802,7 +826,7 @@ export default function NGODashboard() {
                 </button>
                 {selected.status === 'pending' && (
                   <button 
-                    onClick={() => { updateStatus(selected._id, 'accepted'); setSelected(null); }}
+                    onClick={() => { updateStatus(selected._id, 'accepted', statusNote); setSelected(null); }}
                     className="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-label-md hover:bg-primary-container hover:text-on-primary-container font-bold transition-all shadow-md active:scale-95"
                   >
                     Accept Donation
@@ -810,7 +834,7 @@ export default function NGODashboard() {
                 )}
                 {selected.status === 'accepted' && (
                   <button 
-                    onClick={() => { updateStatus(selected._id, 'collected'); setSelected(null); }}
+                    onClick={() => { updateStatus(selected._id, 'collected', statusNote); setSelected(null); }}
                     className="bg-secondary text-white px-6 py-2.5 rounded-xl font-label-md hover:bg-secondary-container hover:text-on-primary font-bold transition-all shadow-md active:scale-95"
                   >
                     Collect Items
@@ -818,7 +842,7 @@ export default function NGODashboard() {
                 )}
                 {selected.status === 'collected' && (
                   <button 
-                    onClick={() => { updateStatus(selected._id, 'distributed'); setSelected(null); }}
+                    onClick={() => { updateStatus(selected._id, 'distributed', statusNote); setSelected(null); }}
                     className="bg-[#4caf50] text-white px-6 py-2.5 rounded-xl font-label-md hover:bg-[#388e3c] font-bold transition-all shadow-md active:scale-95"
                   >
                     Mark Distributed

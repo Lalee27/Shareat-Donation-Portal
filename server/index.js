@@ -1,4 +1,10 @@
 require('dotenv').config();
+const dns = require('dns');
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch (e) {
+  // Ignored if older node version
+}
 const cluster = require('cluster');
 const os = require('os');
 

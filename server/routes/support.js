@@ -37,11 +37,12 @@ router.post('/chat', async (req, res) => {
     }
 
     const FALLBACK_MODELS = [
-      "gemini-flash-latest",
-      "gemini-pro-latest",
+      "gemini-2.5-flash",
       "gemini-2.5-flash-lite",
+      "gemini-2.0-flash",
       "gemini-2.0-flash-lite",
-      "gemini-2.0-flash"
+      "gemini-flash-latest",
+      "gemini-pro-latest"
     ];
 
     let text = null;

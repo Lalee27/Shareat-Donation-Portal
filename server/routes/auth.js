@@ -15,6 +15,11 @@ const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || 'your_google_client_id_here');
 
 // Ensure uploads directory exists
@@ -58,8 +63,14 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Name, email, and password are required.' });
     }
 
+    const lowerEmail = email.toLowerCase().trim();
+
+    if (!validateEmail(lowerEmail)) {
+      return res.status(400).json({ message: 'Email is invalid.' });
+    }
+
     // Check if user already exists
-    const existingUser = await User.findOne({ $or: [{ email }, { secondaryEmails: email }] });
+    const existingUser = await User.findOne({ $or: [{ email: lowerEmail }, { secondaryEmails: lowerEmail }] });
     if (existingUser) {
       // Agar user hai but email verified nahi hai, toh usse dubara OTP bhejo
       if (!existingUser.isEmailVerified) {
@@ -93,7 +104,7 @@ router.post('/register', async (req, res) => {
     // Create user (email unverified by default)
     const user = new User({
       name,
-      email,
+      email: lowerEmail,
       password: hashedPassword,
       phone,
       role: role || 'donor',
@@ -142,7 +153,11 @@ router.post('/verify-email', async (req, res) => {
       return res.status(400).json({ message: 'Email and verification code are required.' });
     }
 
-    const user = await User.findOne({ email });
+    const lowerEmail = email.toLowerCase().trim();
+    if (!validateEmail(lowerEmail)) {
+      return res.status(400).json({ message: 'Email is invalid.' });
+    }
+    const user = await User.findOne({ email: lowerEmail });
     if (!user) {
       return res.status(404).json({ message: 'User not found with this email.' });
     }
@@ -194,7 +209,11 @@ router.post('/resend-otp', async (req, res) => {
       return res.status(400).json({ message: 'Email is required.' });
     }
 
-    const user = await User.findOne({ email });
+    const lowerEmail = email.toLowerCase().trim();
+    if (!validateEmail(lowerEmail)) {
+      return res.status(400).json({ message: 'Email is invalid.' });
+    }
+    const user = await User.findOne({ email: lowerEmail });
     if (!user) {
       return res.status(404).json({ message: 'User not found with this email.' });
     }
@@ -230,16 +249,26 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required.' });
+    }
+
+    const lowerEmail = email.toLowerCase().trim();
+
+    if (!validateEmail(lowerEmail)) {
+      return res.status(400).json({ message: 'Email is invalid.' });
+    }
+
     // Find user
-    const user = await User.findOne({ $or: [{ email }, { secondaryEmails: email }] });
+    const user = await User.findOne({ $or: [{ email: lowerEmail }, { secondaryEmails: lowerEmail }] });
     if (!user) {
-      return res.status(400).json({ message: 'Invalid email or password.' });
+      return res.status(400).json({ message: 'Email is invalid.' });
     }
 
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email or password.' });
+      return res.status(400).json({ message: 'Invalid password.' });
     }
 
     // Check if email is verified
@@ -293,14 +322,16 @@ router.post('/google', async (req, res) => {
     const payload = await response.json();
     const { email, name, picture } = payload;
 
+    const lowerEmail = email.toLowerCase().trim();
+
     // Check if user exists
-    let user = await User.findOne({ $or: [{ email }, { secondaryEmails: email }] });
+    let user = await User.findOne({ $or: [{ email: lowerEmail }, { secondaryEmails: lowerEmail }] });
     
     if (!user) {
       // If user doesn't exist, create a new one
       user = new User({
         name,
-        email,
+        email: lowerEmail,
         password: await bcrypt.hash(Date.now().toString() + Math.random().toString(), 10), // Random placeholder password
         role: role || 'donor', // default role
         avatar: picture,
@@ -331,17 +362,18 @@ router.post('/google-demo', async (req, res) => {
       return res.status(400).json({ message: 'Please provide a valid simulated email.' });
     }
 
-    const name = email.split('@')[0]; // Simple mock name
+    const lowerEmail = email.toLowerCase().trim();
+    const name = lowerEmail.split('@')[0]; // Simple mock name
     const picture = 'https://ui-avatars.com/api/?name=' + name; // Mock avatar
 
     // Check if user exists
-    let user = await User.findOne({ $or: [{ email }, { secondaryEmails: email }] });
+    let user = await User.findOne({ $or: [{ email: lowerEmail }, { secondaryEmails: lowerEmail }] });
     
     if (!user) {
       // Create bypassed user
       user = new User({
         name,
-        email,
+        email: lowerEmail,
         password: await bcrypt.hash('simulated_password_123', 10),
         role: role || 'donor',
         avatar: picture,
@@ -371,17 +403,18 @@ router.post('/apple-demo', async (req, res) => {
       return res.status(400).json({ message: 'Please provide a valid simulated Apple ID.' });
     }
 
-    const name = email.split('@')[0]; // Simple mock name
+    const lowerEmail = email.toLowerCase().trim();
+    const name = lowerEmail.split('@')[0]; // Simple mock name
     const picture = 'https://ui-avatars.com/api/?name=' + name + '&background=000000&color=ffffff'; // Mock Apple avatar
 
     // Check if user exists
-    let user = await User.findOne({ $or: [{ email }, { secondaryEmails: email }] });
+    let user = await User.findOne({ $or: [{ email: lowerEmail }, { secondaryEmails: lowerEmail }] });
     
     if (!user) {
       // Create bypassed user
       user = new User({
         name,
-        email,
+        email: lowerEmail,
         password: await bcrypt.hash('simulated_apple_password_123', 10),
         role: role || 'donor',
         avatar: picture,
@@ -543,6 +576,10 @@ router.post('/emails', auth, async (req, res) => {
 
     const lowerEmail = email.toLowerCase().trim();
 
+    if (!validateEmail(lowerEmail)) {
+      return res.status(400).json({ message: 'Email is invalid.' });
+    }
+
     // Check if email already in use
     const existingUser = await User.findOne({ $or: [{ email: lowerEmail }, { secondaryEmails: lowerEmail }] });
     if (existingUser) {
@@ -584,6 +621,11 @@ router.post('/forgot-password', async (req, res) => {
     if (!email) return res.status(400).json({ message: 'Email is required.' });
 
     const lowerEmail = email.toLowerCase().trim();
+
+    if (!validateEmail(lowerEmail)) {
+      return res.status(400).json({ message: 'Email is invalid.' });
+    }
+
     const user = await User.findOne({ $or: [{ email: lowerEmail }, { secondaryEmails: lowerEmail }] });
 
     if (!user) {
@@ -617,6 +659,11 @@ router.post('/reset-password', async (req, res) => {
     }
 
     const lowerEmail = email.toLowerCase().trim();
+
+    if (!validateEmail(lowerEmail)) {
+      return res.status(400).json({ message: 'Email is invalid.' });
+    }
+
     const user = await User.findOne({ $or: [{ email: lowerEmail }, { secondaryEmails: lowerEmail }] });
 
     if (!user) {
