@@ -120,14 +120,18 @@ router.post('/register', async (req, res) => {
 
     await user.save();
 
-    // Send OTP email to the user
-    await sendEmail({
-      email: user.email,
-      subject: 'Shareat - Verify Your Email',
-      message: `Hello ${user.name},\n\nWelcome to Shareat! Your email verification code is:\n\n${otp}\n\nThis code will expire in 10 minutes. Please enter it on the verification page to activate your account.\n\nThank you,\nShareat Team`
-    });
-
-    console.log(`📧 OTP sent to ${user.email}: ${otp}`);
+    // Send OTP email to the user (non-fatal)
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Shareat - Verify Your Email',
+        message: `Hello ${user.name},\n\nWelcome to Shareat! Your email verification code is:\n\n${otp}\n\nThis code will expire in 10 minutes. Please enter it on the verification page to activate your account.\n\nThank you,\nShareat Team`
+      });
+      console.log(`📧 OTP sent to ${user.email}: ${otp}`);
+    } catch (emailError) {
+      console.error('⚠️ Email sending failed (non-fatal):', emailError.message);
+      console.log(`📋 OTP for ${user.email}: ${otp}`);
+    }
 
     res.status(201).json({ 
       message: 'Registration successful! Please check your email for the verification code.',
@@ -143,6 +147,7 @@ router.post('/register', async (req, res) => {
     res.status(500).json({ message: 'Server error during registration.' });
   }
 });
+
 
 // POST /api/auth/verify-email - Verify OTP code
 router.post('/verify-email', async (req, res) => {
