@@ -151,34 +151,36 @@ function startApp() {
   // Connect to MongoDB and start server
   const PORT = process.env.PORT || 5000;
   const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/donation-platform';
-  let server;
+
+  // Start HTTP server FIRST so Render health check passes immediately
+  const server = app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT} (Worker process: ${process.pid})`);
+  });
 
   const connectDB = async () => {
     let retries = 5;
     while (retries > 0) {
       try {
         await mongoose.connect(MONGODB_URI, {
-          serverSelectionTimeoutMS: 5000,
+          serverSelectionTimeoutMS: 10000,
         });
         console.log(`✅ Connected to MongoDB (Worker process: ${process.pid})`);
-        server = app.listen(PORT, () => {
-          console.log(`🚀 Server running on port ${PORT} (Worker process: ${process.pid})`);
-        });
         break;
       } catch (err) {
         console.error(`❌ MongoDB connection error: ${err.message}`);
         retries -= 1;
-        console.log(`⚠️ Retrying in 5 seconds... (${retries} attempts left)`);
         if (retries === 0) {
-          console.error('❌ Failed to connect to MongoDB after multiple attempts.');
-          process.exit(1);
+          console.error('❌ Failed to connect to MongoDB after multiple attempts. Server will keep running but DB features will be unavailable.');
+          return;
         }
+        console.log(`⚠️ Retrying in 5 seconds... (${retries} attempts left)`);
         await new Promise(res => setTimeout(res, 5000));
       }
     }
   };
 
   connectDB();
+
 
   // Graceful Shutdown Handler
   const gracefulShutdown = (signal) => {
