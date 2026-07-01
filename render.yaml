@@ -1,0 +1,55 @@
+services:
+  # ─────────────────────────────────────────────
+  # 1. BACKEND — Node.js / Express Web Service
+  # ─────────────────────────────────────────────
+  - type: web
+    name: donation-portal-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: CLIENT_URL
+        value: https://donation-portal-client.onrender.com
+      - key: MONGODB_URI
+        sync: false          # Set this manually in Render dashboard (MongoDB Atlas URI)
+      - key: JWT_SECRET
+        sync: false          # Set manually in dashboard
+      - key: GEMINI_API_KEY
+        sync: false          # Set manually in dashboard
+      - key: EMAIL_USER
+        sync: false          # Set manually in dashboard
+      - key: EMAIL_PASS
+        sync: false          # Set manually in dashboard
+
+  # ─────────────────────────────────────────────
+  # 2. FRONTEND — React / Vite Static Site
+  # ─────────────────────────────────────────────
+  - type: web
+    name: donation-portal-client
+    runtime: static
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_GOOGLE_CLIENT_ID
+        sync: false          # Set manually in dashboard
+      - key: VITE_API_URL
+        sync: false          # Set to your backend Render URL e.g. https://donation-portal-api.onrender.com
+    routes:
+      # Forward all /api/* and /uploads/* requests to the backend
+      - type: rewrite
+        source: /api/*
+        destination: https://donation-portal-api.onrender.com/api/:splat
+      - type: rewrite
+        source: /uploads/*
+        destination: https://donation-portal-api.onrender.com/uploads/:splat
+      # SPA fallback — all other routes serve index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html

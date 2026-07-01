@@ -56,8 +56,23 @@ function startApp() {
   // Gzip Compression to minimize bandwidth usage and latency
   app.use(compression());
 
-  // CORS Middleware
-  app.use(cors());
+  // CORS Middleware — allowed origins based on environment
+  const allowedOrigins = process.env.NODE_ENV === 'production'
+    ? [
+        process.env.CLIENT_URL,               // e.g. https://donation-portal-client.onrender.com
+        'https://donation-portal-client.onrender.com'
+      ].filter(Boolean)
+    : ['http://localhost:5173', 'http://localhost:3000'];
+
+  app.use(cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (Postman, mobile apps, curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
+    credentials: true,
+  }));
   app.use(express.json());
   app.use('/uploads', express.static('uploads'));
 
