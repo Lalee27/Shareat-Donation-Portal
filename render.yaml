@@ -5,6 +5,7 @@ services:
   - type: web
     name: donation-portal-api
     runtime: node
+    plan: free
     rootDir: server
     buildCommand: npm install
     startCommand: node index.js
