@@ -11,7 +11,9 @@ services:
       - JWT_SECRET=donation_platform_jwt_secret_key_2026
       - NODE_ENV=production
       - CLIENT_URL=https://${DOMAIN}
-      # Add GEMINI_API_KEY, EMAIL_USER, EMAIL_PASS, etc., in your deployment environment or .env file
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
     depends_on:
       - mongo
     restart: always
