@@ -20,11 +20,25 @@ services:
       context: ./client
       target: production
     container_name: shareat-client-prod
-    ports:
-      - "80:80"
+    expose:
+      - "80"
     depends_on:
       - server
     restart: always
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: shareat-caddy-prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - client
 
   mongo:
     image: mongo:7.0
@@ -35,3 +49,5 @@ services:
 
 volumes:
   mongo-prod-data:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,10 @@
+{
+    # Global options
+    # admin off
+}
+
+# Replace {$DOMAIN} with your actual domain or IP.nip.io
+# For example: 123.45.67.89.nip.io
+{$DOMAIN} {
+    reverse_proxy client:80
+}
